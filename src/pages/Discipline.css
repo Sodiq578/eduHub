@@ -1,0 +1,77 @@
+.discipline-page {
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.discipline-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-card.award .stat-value { color: #f59e0b; }
+.stat-card.warning .stat-value { color: #ef4444; }
+
+.discipline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.record-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  border-left: 4px solid;
+  transition: all 0.3s;
+}
+
+.record-card.award { border-left-color: #f59e0b; }
+.record-card.warning { border-left-color: #ef4444; }
+
+.record-card:hover { transform: translateX(4px); box-shadow: 0 8px 16px rgba(0,0,0,0.05); }
+
+.record-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.record-card.award .record-icon { background: #fef3c7; color: #d97706; }
+.record-card.warning .record-icon { background: #fee2e2; color: #dc2626; }
+
+.record-info { flex: 1; }
+.record-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.record-student { font-size: 13px; color: #10b981; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.record-desc { font-size: 13px; color: #475569; margin-bottom: 8px; }
+.record-meta { font-size: 11px; color: #94a3b8; display: flex; gap: 12px; flex-wrap: wrap; }
+
+.top-students {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.top-students h3 { font-size: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+.top-list { display: flex; flex-direction: column; gap: 12px; }
+.top-item { display: flex; align-items: center; gap: 12px; padding: 8px; background: #f8fafc; border-radius: 12px; }
+.top-rank { width: 30px; height: 30px; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.top-name { flex: 1; font-weight: 500; }
+.top-points { font-weight: 700; color: #10b981; }
+
+@media (max-width: 768px) {
+  .discipline-page { padding: 16px; }
+  .discipline-grid { grid-template-columns: 1fr; }
+  .record-card { flex-direction: column; text-align: center; }
+  .record-icon { margin: 0 auto; }
+}

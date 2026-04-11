@@ -1,0 +1,727 @@
+/* ============================================
+   DASHBOARD ASOSIY STILLAR
+   ============================================ */
+.dashboard {
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1e293b, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.dashboard-header p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-badge {
+  background: linear-gradient(135deg, #10b98115, #05966915);
+  padding: 8px 16px;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #10b981;
+  font-size: 13px;
+}
+
+.live-badge {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.export-btn {
+  background: white;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.export-btn:hover {
+  border-color: #10b981;
+  color: #10b981;
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   STATISTIK KARTALAR
+   ============================================ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* ============================================
+   GRAFIKLAR GRID
+   ============================================ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  border: 1px solid #e2e8f0;
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card-header h3, .chart-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+  font-size: 13px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.view-all-btn {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* ============================================
+   CHART CONTAINERLAR
+   ============================================ */
+.chart-container {
+  height: 300px;
+  position: relative;
+}
+
+.chart-container.small {
+  height: 200px;
+}
+
+.chart-container.doughnut {
+  height: 200px;
+}
+
+/* ============================================
+   DAVOMAT SUMMARY
+   ============================================ */
+.attendance-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-label {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+/* ============================================
+   BAJOLAR STATISTIKASI
+   ============================================ */
+.grade-stats {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.grade-item {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.grade-item.good {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.grade-item.normal {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.grade-item.bad {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.grade-item.worst {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ============================================
+   ACTIVITY LIST
+   ============================================ */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f8fafc;
+  transition: all 0.3s;
+}
+
+.activity-item:hover {
+  background: #f1f5f9;
+  transform: translateX(5px);
+}
+
+.activity-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.activity-details {
+  flex: 1;
+}
+
+.activity-details p {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #1e293b;
+}
+
+.activity-details small {
+  color: #94a3b8;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================
+   TOP STUDENTS
+   ============================================ */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.top-students {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.student-rank {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 16px;
+  transition: all 0.3s;
+  flex-wrap: wrap;
+}
+
+.student-rank:hover {
+  background: #f1f5f9;
+  transform: translateX(5px);
+}
+
+.rank {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.rank-1 {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #d97706;
+}
+
+.rank-2 {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: #6b7280;
+}
+
+.rank-3 {
+  background: linear-gradient(135deg, #fed7aa, #fdba74);
+  color: #ea580c;
+}
+
+.student-info {
+  flex: 1;
+  min-width: 150px;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.student-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.grade {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.points {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.improvement {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.improvement.up {
+  color: #10b981;
+}
+
+.improvement.down {
+  color: #ef4444;
+}
+
+.progress-bar {
+  width: 150px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 10px;
+  transition: width 1s ease;
+}
+
+/* ============================================
+   TADBIRLAR
+   ============================================ */
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 16px;
+  transition: all 0.3s;
+}
+
+.event-item:hover {
+  background: #f1f5f9;
+  transform: translateX(5px);
+}
+
+.event-date {
+  text-align: center;
+  min-width: 60px;
+  padding: 8px;
+  background: white;
+  border-radius: 12px;
+}
+
+.event-day {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.event-month {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.event-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.event-info p {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.event-item.meeting .event-date {
+  border-left: 3px solid #3b82f6;
+}
+
+.event-item.event .event-date {
+  border-left: 3px solid #10b981;
+}
+
+.event-item.exam .event-date {
+  border-left: 3px solid #f59e0b;
+}
+
+/* ============================================
+   RESPONSIVE - TABLET (768px - 1024px)
+   ============================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard {
+    padding: 20px;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  
+  .chart-container {
+    height: 250px;
+  }
+  
+  .progress-bar {
+    width: 100px;
+  }
+  
+  .student-rank {
+    gap: 12px;
+  }
+  
+  .rank {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE (max-width: 768px)
+   ============================================ */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 16px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .dashboard-header p {
+    font-size: 12px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-container {
+    height: 220px;
+  }
+  
+  .chart-container.doughnut {
+    height: 180px;
+  }
+  
+  .stats-grid {
+    gap: 16px;
+  }
+  
+  .student-rank {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .rank {
+    margin: 0 auto;
+  }
+  
+  .progress-bar {
+    width: 100%;
+  }
+  
+  .student-stats {
+    justify-content: center;
+  }
+  
+  .attendance-summary {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .event-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .event-date {
+    display: inline-flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  
+  .event-day {
+    font-size: 20px;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .grade-stats {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - KICHIK MOBILE (max-width: 480px)
+   ============================================ */
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 12px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-card {
+    padding: 16px;
+  }
+  
+  .activity-item {
+    padding: 8px;
+  }
+  
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
+  .activity-details p {
+    font-size: 13px;
+  }
+  
+  .export-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .header-badge {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+/* ============================================
+   DARK MODE QO'LLAB-QUVVATLASH
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  .dashboard {
+    background: #0f172a;
+  }
+  
+  .chart-card {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .card-header h3, .chart-card h3 {
+    color: #f1f5f9;
+  }
+  
+  .activity-item {
+    background: #334155;
+  }
+  
+  .activity-item:hover {
+    background: #475569;
+  }
+  
+  .activity-details p {
+    color: #f1f5f9;
+  }
+  
+  .student-rank {
+    background: #334155;
+  }
+  
+  .student-rank:hover {
+    background: #475569;
+  }
+  
+  .student-name {
+    color: #f1f5f9;
+  }
+  
+  .event-item {
+    background: #334155;
+  }
+  
+  .event-item:hover {
+    background: #475569;
+  }
+  
+  .event-date {
+    background: #1e293b;
+  }
+  
+  .chart-select {
+    background: #1e293b;
+    border-color: #475569;
+    color: #cbd5e1;
+  }
+  
+  .export-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #cbd5e1;
+  }
+  
+  .export-btn:hover {
+    border-color: #10b981;
+  }
+}
+
+/* ============================================
+   LOADING ANIMATION
+   ============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}

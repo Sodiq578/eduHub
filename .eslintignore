@@ -1,0 +1,17 @@
+src/pages/Attendance.jsx
+src/pages/Classes.jsx
+src/pages/Dashboard.jsx
+src/pages/Exams.jsx
+src/pages/Grades.jsx
+src/pages/Homework.jsx
+src/pages/Library.jsx
+src/pages/Messages.jsx
+src/pages/ParentPanel.jsx
+src/pages/Payments.jsx
+src/pages/Profile.jsx
+src/pages/Reports.jsx
+src/pages/Schedule.jsx
+src/pages/Subjects.jsx
+src/pages/Teachers.jsx
+src/pages/Users.jsx
+src/components/Navbar.jsx
