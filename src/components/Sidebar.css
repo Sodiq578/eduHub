@@ -80,7 +80,7 @@
 
 .sidebar-logo-text span {
   background: linear-gradient(135deg, #f59e0b, #d97706);
-  -webkit-background-clip: text;
+ 
   -webkit-text-fill-color: transparent;
 }
 
