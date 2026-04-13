@@ -11,7 +11,6 @@ import {
   HiOutlineDocumentText,
   HiOutlineClipboardList, 
   HiOutlineTable, 
-  HiOutlineChat, 
   HiOutlineSpeakerphone,
   HiOutlineCreditCard, 
   HiOutlineChartBar, 
@@ -49,7 +48,6 @@ const iconMap = {
   HiOutlineDocumentText,
   HiOutlineClipboardList, 
   HiOutlineTable, 
-  HiOutlineChat, 
   HiOutlineSpeakerphone,
   HiOutlineCreditCard, 
   HiOutlineChartBar, 
@@ -73,7 +71,7 @@ const menuCategories = {
   academic: { name: 'Akademik', icon: HiOutlineBookOpen, order: 2 },
   finance: { name: 'Moliyaviy', icon: HiOutlineCash, order: 3 },
   services: { name: 'Xizmatlar', icon: HiOutlineClipboard, order: 4 },
-  communication: { name: 'Kommunikatsiya', icon: HiOutlineChat, order: 5 },
+  communication: { name: 'Kommunikatsiya', icon: HiOutlineSpeakerphone, order: 5 },
   management: { name: 'Boshqaruv', icon: HiOutlineOfficeBuilding, order: 6 },
   settings: { name: 'Sozlamalar', icon: HiOutlineCog, order: 7 }
 };
@@ -110,7 +108,6 @@ const getMenuCategory = (menuId) => {
     messages: 'communication',
     announcements: 'communication',
     notifications: 'communication',
-    livechat: 'communication',
     surveys: 'communication',
     discipline: 'communication',
     

@@ -13,7 +13,10 @@ import {
   HiOutlineOfficeBuilding,
   HiOutlineClipboardList,
   HiOutlineExclamationCircle,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineViewGrid,
+  HiOutlineViewList,
+  HiOutlineViewBoards
 } from 'react-icons/hi';
 import './Inventory.css';
 
@@ -24,6 +27,7 @@ const Inventory = () => {
   const [filterCondition, setFilterCondition] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [viewMode, setViewMode] = useState('list');
 
   const categories = ['Mebel', 'Texnika', 'Laboratoriya', 'Sport', 'Kutubxona', 'Kantina', 'Transport', 'Boshqa'];
   const conditions = ['Yangi', 'Yaxshi', 'Qoniqarli', "Ta'mir kerak", 'Ishlatilgan'];
@@ -144,6 +148,104 @@ const Inventory = () => {
     }
   };
 
+  const renderInventoryItem = (item) => {
+    const conditionColor = getConditionColor(item.condition);
+    
+    if (viewMode === 'grid') {
+      return (
+        <div key={item.id} className="inventory-card grid-card">
+          <div className="inventory-icon" style={{ background: `${conditionColor}15`, color: conditionColor }}>
+            <HiOutlineCube />
+          </div>
+          <div className="inventory-info">
+            <h3>{item.name}</h3>
+            <p className="inventory-category">{item.category}</p>
+            <div className="inventory-details">
+              <p><HiOutlineLocationMarker /> {item.location}</p>
+              <p>📦 {item.quantity} dona</p>
+              <p className={`condition-${item.condition.toLowerCase().replace(/ /g, '')}`}>
+                {getConditionIcon(item.condition)} {item.condition}
+              </p>
+              <p><HiOutlineCalendar /> Oxirgi tekshiruv: {item.lastCheck}</p>
+              {item.purchaseDate && <p>📅 Sotib olingan: {item.purchaseDate}</p>}
+              {item.price > 0 && <p>💰 Narxi: {item.price.toLocaleString()} so'm</p>}
+              {item.note && <p className="inventory-note">📝 {item.note}</p>}
+            </div>
+          </div>
+          <div className="inventory-actions">
+            <button className="edit-btn" onClick={() => handleEdit(item)}>
+              <HiOutlinePencil /> Tahrirlash
+            </button>
+            <button className="delete-btn" onClick={() => handleDelete(item.id)}>
+              <HiOutlineTrash /> O'chirish
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (viewMode === 'list') {
+      return (
+        <div key={item.id} className="inventory-card list-card">
+          <div className="list-icon" style={{ background: `${conditionColor}15`, color: conditionColor }}>
+            <HiOutlineCube />
+          </div>
+          <div className="list-info">
+            <div className="list-header">
+              <h3>{item.name}</h3>
+              <span className="category-badge">{item.category}</span>
+              <span className="condition-badge" style={{ background: `${conditionColor}20`, color: conditionColor }}>
+                {getConditionIcon(item.condition)} {item.condition}
+              </span>
+            </div>
+            <div className="list-details">
+              <span><HiOutlineLocationMarker /> {item.location}</span>
+              <span>📦 {item.quantity} dona</span>
+              <span><HiOutlineCalendar /> {item.lastCheck}</span>
+              {item.price > 0 && <span>💰 {item.price.toLocaleString()} so'm</span>}
+            </div>
+            {item.note && <p className="list-note">📝 {item.note}</p>}
+          </div>
+          <div className="list-actions">
+            <button className="edit-btn" onClick={() => handleEdit(item)}>
+              <HiOutlinePencil />
+            </button>
+            <button className="delete-btn" onClick={() => handleDelete(item.id)}>
+              <HiOutlineTrash />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Compact mode
+    return (
+      <div key={item.id} className="inventory-card compact-card">
+        <div className="compact-icon" style={{ background: `${conditionColor}15`, color: conditionColor }}>
+          <HiOutlineCube />
+        </div>
+        <div className="compact-info">
+          <h4>{item.name}</h4>
+          <p>{item.category} • {item.location}</p>
+          <div className="compact-meta">
+            <span>📦 {item.quantity}</span>
+            <span className="compact-condition" style={{ color: conditionColor }}>
+              {getConditionIcon(item.condition)} {item.condition}
+            </span>
+          </div>
+        </div>
+        <div className="compact-actions">
+          <button className="compact-edit" onClick={() => handleEdit(item)}>
+            <HiOutlinePencil />
+          </button>
+          <button className="compact-delete" onClick={() => handleDelete(item.id)}>
+            <HiOutlineTrash />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="inventory-page">
       <div className="page-header">
@@ -152,6 +254,17 @@ const Inventory = () => {
           <p>Jami {items.length} turdagi | {totalItems} dona | Umumiy qiymat: {totalValue.toLocaleString()} so'm</p>
         </div>
         <div className="header-buttons">
+          <div className="view-toggle">
+            <button className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')} title="Grid ko'rinish">
+              <HiOutlineViewGrid />
+            </button>
+            <button className={`view-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')} title="List ko'rinish">
+              <HiOutlineViewList />
+            </button>
+            <button className={`view-btn ${viewMode === 'compact' ? 'active' : ''}`} onClick={() => setViewMode('compact')} title="Compact ko'rinish">
+              <HiOutlineViewBoards />
+            </button>
+          </div>
           <button className="btn-export" onClick={exportToCSV}>
             <HiOutlineDownload /> Hisobot
           </button>
@@ -204,7 +317,7 @@ const Inventory = () => {
         </select>
       </div>
 
-      <div className="inventory-grid">
+      <div className={`inventory-container ${viewMode}`}>
         {filtered.length === 0 ? (
           <div className="empty-state">
             <HiOutlineCube size={48} />
@@ -212,36 +325,7 @@ const Inventory = () => {
             <button className="btn-primary" onClick={handleAdd}>Yangi inventar qo'shish</button>
           </div>
         ) : (
-          filtered.map(i => (
-            <div key={i.id} className="inventory-card">
-              <div className="inventory-icon" style={{ background: `${getConditionColor(i.condition)}15`, color: getConditionColor(i.condition) }}>
-                <HiOutlineCube />
-              </div>
-              <div className="inventory-info">
-                <h3>{i.name}</h3>
-                <p className="inventory-category">{i.category}</p>
-                <div className="inventory-details">
-                  <p><HiOutlineLocationMarker /> {i.location}</p>
-                  <p>📦 {i.quantity} dona</p>
-                  <p className={`condition-${i.condition.toLowerCase().replace(/ /g, '')}`}>
-                    {getConditionIcon(i.condition)} {i.condition}
-                  </p>
-                  <p><HiOutlineCalendar /> Oxirgi tekshiruv: {i.lastCheck}</p>
-                  {i.purchaseDate && <p>📅 Sotib olingan: {i.purchaseDate}</p>}
-                  {i.price > 0 && <p>💰 Narxi: {i.price.toLocaleString()} so'm</p>}
-                  {i.note && <p className="inventory-note">📝 {i.note}</p>}
-                </div>
-              </div>
-              <div className="inventory-actions">
-                <button className="edit-btn" onClick={() => handleEdit(i)}>
-                  <HiOutlinePencil /> Tahrirlash
-                </button>
-                <button className="delete-btn" onClick={() => handleDelete(i.id)}>
-                  <HiOutlineTrash /> O'chirish
-                </button>
-              </div>
-            </div>
-          ))
+          filtered.map(item => renderInventoryItem(item))
         )}
       </div>
 
@@ -258,19 +342,11 @@ const Inventory = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Nomi *</label>
-                  <input 
-                    type="text" 
-                    placeholder="Inventar nomi" 
-                    value={editingItem?.name || ''} 
-                    onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                  />
+                  <input type="text" placeholder="Inventar nomi" value={editingItem?.name || ''} onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Kategoriya *</label>
-                  <select 
-                    value={editingItem?.category || ''} 
-                    onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
-                  >
+                  <select value={editingItem?.category || ''} onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}>
                     <option value="">Tanlang</option>
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -280,72 +356,41 @@ const Inventory = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Miqdori</label>
-                  <input 
-                    type="number" 
-                    placeholder="Miqdori" 
-                    value={editingItem?.quantity || 0} 
-                    onChange={(e) => setEditingItem({ ...editingItem, quantity: parseInt(e.target.value) || 0 })}
-                  />
+                  <input type="number" placeholder="Miqdori" value={editingItem?.quantity || 0} onChange={(e) => setEditingItem({ ...editingItem, quantity: parseInt(e.target.value) || 0 })} />
                 </div>
                 <div className="form-group">
                   <label>Joylashuvi</label>
-                  <input 
-                    type="text" 
-                    placeholder="Qayerda joylashgan" 
-                    value={editingItem?.location || ''} 
-                    onChange={(e) => setEditingItem({ ...editingItem, location: e.target.value })}
-                  />
+                  <input type="text" placeholder="Qayerda joylashgan" value={editingItem?.location || ''} onChange={(e) => setEditingItem({ ...editingItem, location: e.target.value })} />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label>Holati</label>
-                  <select 
-                    value={editingItem?.condition || 'Yaxshi'} 
-                    onChange={(e) => setEditingItem({ ...editingItem, condition: e.target.value })}
-                  >
+                  <select value={editingItem?.condition || 'Yaxshi'} onChange={(e) => setEditingItem({ ...editingItem, condition: e.target.value })}>
                     {conditions.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label>Oxirgi tekshiruv</label>
-                  <input 
-                    type="date" 
-                    value={editingItem?.lastCheck || new Date().toISOString().split('T')[0]} 
-                    onChange={(e) => setEditingItem({ ...editingItem, lastCheck: e.target.value })}
-                  />
+                  <input type="date" value={editingItem?.lastCheck || new Date().toISOString().split('T')[0]} onChange={(e) => setEditingItem({ ...editingItem, lastCheck: e.target.value })} />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label>Sotib olingan sana</label>
-                  <input 
-                    type="date" 
-                    value={editingItem?.purchaseDate || ''} 
-                    onChange={(e) => setEditingItem({ ...editingItem, purchaseDate: e.target.value })}
-                  />
+                  <input type="date" value={editingItem?.purchaseDate || ''} onChange={(e) => setEditingItem({ ...editingItem, purchaseDate: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Narxi (so'm)</label>
-                  <input 
-                    type="number" 
-                    placeholder="Narxi" 
-                    value={editingItem?.price || 0} 
-                    onChange={(e) => setEditingItem({ ...editingItem, price: parseInt(e.target.value) || 0 })}
-                  />
+                  <input type="number" placeholder="Narxi" value={editingItem?.price || 0} onChange={(e) => setEditingItem({ ...editingItem, price: parseInt(e.target.value) || 0 })} />
                 </div>
               </div>
 
               <div className="form-group">
                 <label>Izoh</label>
-                <textarea 
-                  rows="2" 
-                  placeholder="Qo'shimcha ma'lumot..." 
-                  value={editingItem?.note || ''} 
-                  onChange={(e) => setEditingItem({ ...editingItem, note: e.target.value })}
-                />
+                <textarea rows="2" placeholder="Qo'shimcha ma'lumot..." value={editingItem?.note || ''} onChange={(e) => setEditingItem({ ...editingItem, note: e.target.value })} />
               </div>
             </div>
             <div className="modal-buttons">

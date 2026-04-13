@@ -38,7 +38,6 @@ import Documents from './pages/Documents';
 import Payroll from './pages/Payroll';
 import Inventory from './pages/Inventory';
 import AiAssistant from './components/AiAssistant';
-
 import { 
   HiOutlineViewGrid, 
   HiOutlineUsers, 

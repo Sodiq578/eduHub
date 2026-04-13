@@ -31,6 +31,41 @@
 .header-buttons {
   display: flex;
   gap: 12px;
+  align-items: center;
+}
+
+/* View Toggle Styles */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.view-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.view-btn:hover {
+  color: #10b981;
+  background: white;
+}
+
+.view-btn.active {
+  background: white;
+  color: #10b981;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .btn-primary {
@@ -155,14 +190,33 @@
   outline: none;
 }
 
-/* Foydalanuvchilar grid */
-.users-grid {
+/* Users Container */
+.users-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.users-container.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 24px;
 }
 
-.user-card {
+.users-container.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.users-container.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Grid Card Styles */
+.grid-card {
   background: white;
   border-radius: 24px;
   overflow: hidden;
@@ -170,12 +224,12 @@
   transition: all 0.3s;
 }
 
-.user-card:hover {
+.grid-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
-.user-card-header {
+.grid-card .user-card-header {
   padding: 24px;
   display: flex;
   justify-content: center;
@@ -213,12 +267,12 @@
   background: #ef4444;
 }
 
-.user-card-body {
+.grid-card .user-card-body {
   padding: 20px;
   text-align: center;
 }
 
-.user-card-body h3 {
+.grid-card .user-card-body h3 {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 6px;
@@ -267,17 +321,188 @@
   border-top: 1px solid #f1f5f9;
 }
 
+/* List Card Styles */
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 16px 24px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.list-card:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.small-avatar {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+}
+
+.list-card-info {
+  flex: 1;
+}
+
+.list-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.list-card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.status-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.list-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.role-badge.small {
+  padding: 2px 8px;
+  font-size: 11px;
+  margin-bottom: 0;
+}
+
+.list-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Compact Card Styles */
+.compact-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.compact-card:hover {
+  background: #f8fafc;
+}
+
+.compact-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.compact-info {
+  flex: 1;
+}
+
+.compact-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.compact-info p {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.compact-role {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.compact-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.compact-edit, .compact-delete {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.compact-edit {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.compact-edit:hover {
+  background: #bfdbfe;
+}
+
+.compact-delete {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.compact-delete:hover {
+  background: #fecaca;
+}
+
+/* User Actions Buttons */
+.user-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
 .edit-btn, .delete-btn {
   flex: 1;
-  padding: 10px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.2s;
 }
@@ -302,8 +527,8 @@
   transform: translateY(-2px);
 }
 
+/* Empty State */
 .empty-state {
-  grid-column: 1 / -1;
   text-align: center;
   padding: 60px;
   background: white;
@@ -487,12 +712,13 @@
   border: none;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .users-page {
     padding: 16px;
   }
   
-  .users-grid {
+  .users-container.grid {
     grid-template-columns: 1fr;
   }
   
@@ -527,6 +753,23 @@
   
   .header-buttons {
     flex-direction: column;
+  }
+  
+  .list-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .list-card-details {
+    justify-content: center;
+  }
+  
+  .list-card-header {
+    justify-content: center;
+  }
+  
+  .compact-card {
+    flex-wrap: wrap;
   }
 }
 

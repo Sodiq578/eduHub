@@ -79,7 +79,7 @@ const Teachers = () => {
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [viewMode, setViewMode] = useState('list'); // grid or list
   const [selectedSubject, setSelectedSubject] = useState('');
 
   const subjects = ['Hammasi', 'Matematika', 'Fizika', 'Ingliz tili', 'Tarix', 'Biologiya'];

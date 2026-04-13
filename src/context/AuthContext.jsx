@@ -78,6 +78,9 @@ export const AuthProvider = ({ children }) => {
       { id: 'attendance', name: 'Davomatim', icon: 'HiOutlineCalendar' },
       { id: 'homework', name: 'Uy vazifalari', icon: 'HiOutlineClipboardList' },
       { id: 'schedule', name: 'Dars jadvali', icon: 'HiOutlineTable' },
+      { id: 'library', name: 'Kutubxona', icon: 'HiOutlineBookOpen' },  // ✅ O'quvchi uchun kutubxona qo'shildi
+      { id: 'attendance', name: 'Davomat', icon: 'HiOutlineCalendar' },
+
       { id: 'cafeteria', name: 'Ovqatlanish', icon: 'HiOutlineCreditCard' },
       { id: 'notifications', name: 'Ogohlantirishlar', icon: 'HiOutlineBell' },
       { id: 'messages', name: 'Xabarlar', icon: 'HiOutlineChat' },
@@ -174,6 +177,7 @@ export const AuthProvider = ({ children }) => {
       attendance: true,
       homework: true,
       schedule: true,
+      library: true,  // ✅ O'quvchi kutubxonani ko'ra oladi
       cafeteria: true,
       notifications: true,
       messages: true,

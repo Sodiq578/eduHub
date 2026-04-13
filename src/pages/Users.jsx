@@ -12,7 +12,10 @@ import {
   HiOutlineFilter,
   HiOutlineDownload,
   HiOutlineShieldCheck,
-  HiOutlineCalendar
+  HiOutlineCalendar,
+  HiOutlineViewGrid,
+  HiOutlineViewList,
+  HiOutlineViewBoards
 } from 'react-icons/hi';
 import './Users.css';
 
@@ -23,6 +26,7 @@ const Users = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [viewMode, setViewMode] = useState('list'); // 'grid', 'list', 'compact'
 
   // Ruxsatni tekshirish (faqat admin)
   if (!hasPermission('users')) {
@@ -146,6 +150,104 @@ const Users = () => {
     active: users.filter(u => u.status === 'active').length
   };
 
+  // Render user card based on view mode
+  const renderUserCard = (user) => {
+    const commonButtons = (
+      <div className="user-actions">
+        <button className="edit-btn" onClick={() => handleEdit(user)}>
+          <HiOutlinePencil /> Tahrirlash
+        </button>
+        <button className="delete-btn" onClick={() => handleDelete(user.id, user.role, user.name)}>
+          <HiOutlineTrash /> O'chirish
+        </button>
+      </div>
+    );
+
+    if (viewMode === 'grid') {
+      return (
+        <div key={user.id} className="user-card grid-card">
+          <div className="user-card-header" style={{ background: roleColors[user.role] + '15' }}>
+            <div className="user-avatar" style={{ background: roleColors[user.role] }}>
+              {user.avatar || user.name.charAt(0)}
+            </div>
+            <div className={`user-status-dot ${user.status}`}></div>
+          </div>
+          <div className="user-card-body">
+            <h3>{user.name}</h3>
+            <p className="user-email">{user.email}</p>
+            <span className="role-badge" style={{ background: roleColors[user.role] + '20', color: roleColors[user.role] }}>
+              {roleLabels[user.role]}
+            </span>
+            {user.class && <p className="user-extra"><HiOutlineCalendar /> Sinf: {user.class}</p>}
+            {user.subject && <p className="user-extra"><HiOutlineShieldCheck /> Fan: {user.subject}</p>}
+            {user.phone && <p className="user-extra">📞 {user.phone}</p>}
+            <p className="user-register-date"><HiOutlineCalendar /> Qo'shilgan: {user.registerDate}</p>
+          </div>
+          <div className="user-card-footer">
+            {commonButtons}
+          </div>
+        </div>
+      );
+    }
+
+    if (viewMode === 'list') {
+      return (
+        <div key={user.id} className="user-card list-card">
+          <div className="list-card-avatar">
+            <div className="user-avatar small-avatar" style={{ background: roleColors[user.role] }}>
+              {user.avatar || user.name.charAt(0)}
+            </div>
+          </div>
+          <div className="list-card-info">
+            <div className="list-card-header">
+              <h3>{user.name}</h3>
+              <span className={`status-badge ${user.status}`}>
+                {user.status === 'active' ? 'Aktiv' : 'Noaktiv'}
+              </span>
+            </div>
+            <p className="user-email">{user.email}</p>
+            <div className="list-card-details">
+              <span className="role-badge small" style={{ background: roleColors[user.role] + '20', color: roleColors[user.role] }}>
+                {roleLabels[user.role]}
+              </span>
+              {user.class && <span>Sinf: {user.class}</span>}
+              {user.subject && <span>Fan: {user.subject}</span>}
+              {user.phone && <span>📞 {user.phone}</span>}
+              <span>📅 {user.registerDate}</span>
+            </div>
+          </div>
+          <div className="list-card-actions">
+            {commonButtons}
+          </div>
+        </div>
+      );
+    }
+
+    // Compact mode
+    return (
+      <div key={user.id} className="user-card compact-card">
+        <div className="compact-avatar" style={{ background: roleColors[user.role] }}>
+          {user.avatar || user.name.charAt(0)}
+        </div>
+        <div className="compact-info">
+          <h4>{user.name}</h4>
+          <p>{user.email}</p>
+        </div>
+        <div className="compact-role" style={{ background: roleColors[user.role] + '20', color: roleColors[user.role] }}>
+          {roleLabels[user.role]}
+        </div>
+        <div className="compact-actions">
+          <button className="compact-edit" onClick={() => handleEdit(user)}>
+            <HiOutlinePencil />
+          </button>
+          <button className="compact-delete" onClick={() => handleDelete(user.id, user.role, user.name)}>
+            <HiOutlineTrash />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="users-page">
       <div className="page-header">
@@ -154,6 +256,29 @@ const Users = () => {
           <p>Jami {stats.total} ta foydalanuvchi | {stats.active} ta aktiv | {stats.admins} admin | {stats.teachers} o'qituvchi | {stats.students} o'quvchi</p>
         </div>
         <div className="header-buttons">
+          <div className="view-toggle">
+            <button 
+              className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid ko'rinish"
+            >
+              <HiOutlineViewGrid />
+            </button>
+            <button 
+              className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="List ko'rinish"
+            >
+              <HiOutlineViewList />
+            </button>
+            <button 
+              className={`view-btn ${viewMode === 'compact' ? 'active' : ''}`}
+              onClick={() => setViewMode('compact')}
+              title="Compact ko'rinish"
+            >
+              <HiOutlineViewBoards />
+            </button>
+          </div>
           <button className="btn-export" onClick={exportToCSV}>
             <HiOutlineDownload /> Hisobot
           </button>
@@ -217,8 +342,8 @@ const Users = () => {
         </div>
       </div>
 
-      {/* Foydalanuvchilar grid */}
-      <div className="users-grid">
+      {/* Foydalanuvchilar konteyneri */}
+      <div className={`users-container ${viewMode}`}>
         {filteredUsers.length === 0 ? (
           <div className="empty-state">
             <HiOutlineUser size={48} />
@@ -226,39 +351,11 @@ const Users = () => {
             <button className="btn-primary" onClick={handleAdd}>Yangi foydalanuvchi qo'shish</button>
           </div>
         ) : (
-          filteredUsers.map(user => (
-            <div key={user.id} className="user-card">
-              <div className="user-card-header" style={{ background: roleColors[user.role] + '15' }}>
-                <div className="user-avatar" style={{ background: roleColors[user.role] }}>
-                  {user.avatar || user.name.charAt(0)}
-                </div>
-                <div className={`user-status-dot ${user.status}`}></div>
-              </div>
-              <div className="user-card-body">
-                <h3>{user.name}</h3>
-                <p className="user-email">{user.email}</p>
-                <span className="role-badge" style={{ background: roleColors[user.role] + '20', color: roleColors[user.role] }}>
-                  {roleLabels[user.role]}
-                </span>
-                {user.class && <p className="user-extra"><HiOutlineCalendar /> Sinf: {user.class}</p>}
-                {user.subject && <p className="user-extra"><HiOutlineShieldCheck /> Fan: {user.subject}</p>}
-                {user.phone && <p className="user-extra">📞 {user.phone}</p>}
-                <p className="user-register-date"><HiOutlineCalendar /> Qo'shilgan: {user.registerDate}</p>
-              </div>
-              <div className="user-card-footer">
-                <button className="edit-btn" onClick={() => handleEdit(user)}>
-                  <HiOutlinePencil /> Tahrirlash
-                </button>
-                <button className="delete-btn" onClick={() => handleDelete(user.id, user.role, user.name)}>
-                  <HiOutlineTrash /> O'chirish
-                </button>
-              </div>
-            </div>
-          ))
+          filteredUsers.map(user => renderUserCard(user))
         )}
       </div>
 
-      {/* Modal oyna */}
+      {/* Modal oyna (avvalgidek qoladi) */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
