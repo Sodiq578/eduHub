@@ -83,42 +83,45 @@ function AppContent() {
 
   if (!isAuthenticated) return <Login />;
 
+  // Barcha sahifalar uchun umumiy props
+  const commonProps = { onNavigate: setActivePage };
+
   const renderPage = () => {
     switch(activePage) {
-      case 'dashboard': return <Dashboard />;
-      case 'students': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Students /> : <AccessDenied />;
-      case 'teachers': return user?.role === roles.ADMIN ? <Teachers /> : <AccessDenied />;
-      case 'classes': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Classes /> : <AccessDenied />;
-      case 'subjects': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Subjects /> : <AccessDenied />;
-      case 'attendance': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Attendance /> : <AccessDenied />;
-      case 'grades': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Grades /> : user?.role === roles.STUDENT || user?.role === roles.PARENT ? <ParentPanel /> : <AccessDenied />;
-      case 'exams': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Exams /> : <AccessDenied />;
-      case 'homework': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Homework /> : <AccessDenied />;
-      case 'schedule': return <Schedule />;
-      case 'payments': return user?.role === roles.ADMIN || user?.role === roles.FINANCE || user?.role === roles.PARENT ? <Payments /> : <AccessDenied />;
-      case 'reports': return user?.role === roles.ADMIN || user?.role === roles.FINANCE ? <Reports /> : <AccessDenied />;
-      case 'payroll': return user?.role === roles.ADMIN || user?.role === roles.FINANCE ? <Payroll /> : <AccessDenied />;
-      case 'library': return <Library />;
-      case 'cafeteria': return <Cafeteria />;
-      case 'health': return <Health />;
-      case 'transport': return <Transport />;
-      case 'messages': return <Messages />;
-      case 'announcements': return <Announcements />;
-      case 'surveys': return <Surveys />;
-      case 'notifications': return <Notifications />;
-      case 'discipline': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Discipline /> : <AccessDenied />;
-      case 'livechat': return <LiveChat />;
-      case 'staff': return user?.role === roles.ADMIN ? <Staff /> : <AccessDenied />;
-      case 'alumni': return user?.role === roles.ADMIN ? <Alumni /> : <AccessDenied />;
-      case 'admissions': return user?.role === roles.ADMIN ? <Admissions /> : <AccessDenied />;
-      case 'parents': return user?.role === roles.ADMIN ? <Parents /> : <AccessDenied />;
-      case 'events': return <Events />;
-      case 'documents': return <Documents />;
-      case 'inventory': return user?.role === roles.ADMIN ? <Inventory /> : <AccessDenied />;
-      case 'users': return user?.role === roles.ADMIN ? <Users /> : <AccessDenied />;
-      case 'analytics': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Analytics /> : <AccessDenied />;
-      case 'profile': return <Profile />;
-      default: return <Dashboard />;
+      case 'dashboard': return <Dashboard {...commonProps} />;
+      case 'students': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Students {...commonProps} /> : <AccessDenied />;
+      case 'teachers': return user?.role === roles.ADMIN ? <Teachers {...commonProps} /> : <AccessDenied />;
+      case 'classes': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Classes {...commonProps} /> : <AccessDenied />;
+      case 'subjects': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Subjects {...commonProps} /> : <AccessDenied />;
+      case 'attendance': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Attendance {...commonProps} /> : <AccessDenied />;
+      case 'grades': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Grades {...commonProps} /> : user?.role === roles.STUDENT || user?.role === roles.PARENT ? <ParentPanel {...commonProps} /> : <AccessDenied />;
+      case 'exams': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Exams {...commonProps} /> : <AccessDenied />;
+      case 'homework': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Homework {...commonProps} /> : <AccessDenied />;
+      case 'schedule': return <Schedule {...commonProps} />;
+      case 'payments': return user?.role === roles.ADMIN || user?.role === roles.FINANCE || user?.role === roles.PARENT ? <Payments {...commonProps} /> : <AccessDenied />;
+      case 'reports': return user?.role === roles.ADMIN || user?.role === roles.FINANCE ? <Reports {...commonProps} /> : <AccessDenied />;
+      case 'payroll': return user?.role === roles.ADMIN || user?.role === roles.FINANCE ? <Payroll {...commonProps} /> : <AccessDenied />;
+      case 'library': return <Library {...commonProps} />;
+      case 'cafeteria': return <Cafeteria {...commonProps} />;
+      case 'health': return <Health {...commonProps} />;
+      case 'transport': return <Transport {...commonProps} />;
+      case 'messages': return <Messages {...commonProps} />;
+      case 'announcements': return <Announcements {...commonProps} />;
+      case 'surveys': return <Surveys {...commonProps} />;
+      case 'notifications': return <Notifications {...commonProps} />;
+      case 'discipline': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Discipline {...commonProps} /> : <AccessDenied />;
+      case 'livechat': return <LiveChat {...commonProps} />;
+      case 'staff': return user?.role === roles.ADMIN ? <Staff {...commonProps} /> : <AccessDenied />;
+      case 'alumni': return user?.role === roles.ADMIN ? <Alumni {...commonProps} /> : <AccessDenied />;
+      case 'admissions': return user?.role === roles.ADMIN ? <Admissions {...commonProps} /> : <AccessDenied />;
+      case 'parents': return user?.role === roles.ADMIN ? <Parents {...commonProps} /> : <AccessDenied />;
+      case 'events': return <Events {...commonProps} />;
+      case 'documents': return <Documents {...commonProps} />;
+      case 'inventory': return user?.role === roles.ADMIN ? <Inventory {...commonProps} /> : <AccessDenied />;
+      case 'users': return user?.role === roles.ADMIN ? <Users {...commonProps} /> : <AccessDenied />;
+      case 'analytics': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Analytics {...commonProps} /> : <AccessDenied />;
+      case 'profile': return <Profile {...commonProps} />;
+      default: return <Dashboard {...commonProps} />;
     }
   };
 

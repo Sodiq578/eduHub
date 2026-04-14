@@ -1,571 +1,465 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  HiOutlineCalendar, 
+  HiOutlineSearch, 
+  HiOutlineFilter,
+  HiOutlineDownload,
+  HiOutlineCalendar,
+  HiOutlineUser,
   HiOutlineCheckCircle,
   HiOutlineXCircle,
   HiOutlineClock,
-  HiOutlineBookOpen,
-  HiOutlineDocumentText,
-  HiOutlineExclamationCircle,
-  HiOutlineUpload,
-  HiOutlineChat,
-  HiOutlineEye,
-  HiOutlineUser,
-  HiOutlineAcademicCap,
   HiOutlineChartBar,
-  HiOutlineBell,
-  HiOutlineX
+  HiOutlinePrinter,
+  HiOutlineChevronLeft,
+  HiOutlineChevronRight
 } from 'react-icons/hi';
-import { useAuth } from '../context/AuthContext';
 import './Attendance.css';
 
+const Attendance = () => {
+  const [students, setStudents] = useState([]);
+  const [attendanceData, setAttendanceData] = useState({});
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedClass, setSelectedClass] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [classes, setClasses] = useState(['9-A', '9-B', '10-A', '10-B', '11-A']);
+  const [showStats, setShowStats] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-const StudentDashboard = () => {
-  const { user } = useAuth();
-  
-  // Student ma'lumotlari
-  const [studentInfo, setStudentInfo] = useState({
-    name: user?.name || 'Ali Valiyev',
-    class: user?.class || '10-A',
-    avatar: user?.avatar || 'A'
-  });
-  
-  // Davomat ma'lumotlari
-  const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  
-  // Uy vazifalari
-  const [homeworks, setHomeworks] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
-  const [fileUpload, setFileUpload] = useState(null);
-  const [selectedHomework, setSelectedHomework] = useState(null);
-  const [showHomeworkDetails, setShowHomeworkDetails] = useState(false);
-  const [showCommentModal, setShowCommentModal] = useState(false);
-  const [commentText, setCommentText] = useState('');
-  const [selectedHomeworkForComment, setSelectedHomeworkForComment] = useState(null);
-  const [comments, setComments] = useState([]);
-  
-  // Statistika
-  const [stats, setStats] = useState({
-    totalDays: 0,
-    present: 0,
-    late: 0,
-    absent: 0,
-    excused: 0,
-    attendanceRate: 0
-  });
-
-  // Load data
+  // LocalStorage dan o'quvchilarni yuklash
   useEffect(() => {
+    loadStudents();
     loadAttendanceData();
-    loadHomeworks();
-    loadSubmissions();
-    loadComments();
-  }, [studentInfo.class, selectedMonth, selectedYear]);
+  }, []);
 
-  const loadAttendanceData = () => {
-    // Haqiqiy ma'lumotlar localStorage dan olinadi
-    const stored = localStorage.getItem(`attendance_${studentInfo.class}`);
-    if (stored) {
-      const allRecords = JSON.parse(stored);
-      // Faqat joriy oy va yil uchun filter
-      const filtered = allRecords.filter(record => {
-        const recordDate = new Date(record.date);
-        return recordDate.getMonth() === selectedMonth && 
-               recordDate.getFullYear() === selectedYear;
-      });
-      setAttendanceRecords(filtered);
-      calculateStats(filtered);
+  // O'quvchilarni yuklash
+  const loadStudents = () => {
+    const storedStudents = localStorage.getItem('students');
+    if (storedStudents) {
+      setStudents(JSON.parse(storedStudents));
     } else {
-      // Test ma'lumotlar
-      const demoRecords = generateDemoAttendance();
-      setAttendanceRecords(demoRecords);
-      calculateStats(demoRecords);
+      const defaultStudents = [
+        { id: 1, name: 'Ali Valiyev', class: '10-A', parent: '+998 90 123 4567', status: 'active', grade: 92, attendance: 95, email: 'ali@example.com' },
+        { id: 2, name: 'Dilnoza Karimova', class: '10-B', parent: '+998 91 234 5678', status: 'active', grade: 95, attendance: 98, email: 'dilnoza@example.com' },
+        { id: 3, name: 'Jasur Aliyev', class: '9-A', parent: '+998 93 345 6789', status: 'inactive', grade: 78, attendance: 85, email: 'jasur@example.com' },
+        { id: 4, name: 'Zarina Toshpulatova', class: '11-A', parent: '+998 94 456 7890', status: 'active', grade: 88, attendance: 92, email: 'zarina@example.com' },
+        { id: 5, name: 'Bobur Sattorov', class: '8-A', parent: '+998 95 567 8901', status: 'active', grade: 85, attendance: 90, email: 'bobur@example.com' },
+      ];
+      setStudents(defaultStudents);
+      localStorage.setItem('students', JSON.stringify(defaultStudents));
     }
   };
 
-  const generateDemoAttendance = () => {
-    const records = [];
-    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-    const studentName = studentInfo.name;
+  // Davomat ma'lumotlarini yuklash
+  const loadAttendanceData = () => {
+    const storedAttendance = localStorage.getItem('attendanceData');
+    if (storedAttendance) {
+      setAttendanceData(JSON.parse(storedAttendance));
+    }
+  };
+
+  // Davomat ma'lumotlarini saqlash
+  const saveAttendanceData = (data) => {
+    localStorage.setItem('attendanceData', JSON.stringify(data));
+    setAttendanceData(data);
+  };
+
+  // Davomatni belgilash
+  const markAttendance = (studentId, status) => {
+    const key = `${selectedDate}_${studentId}`;
+    const updatedData = { ...attendanceData, [key]: status };
+    saveAttendanceData(updatedData);
+  };
+
+  // O'quvchining davomat holatini olish
+  const getAttendanceStatus = (studentId) => {
+    const key = `${selectedDate}_${studentId}`;
+    return attendanceData[key] || null;
+  };
+
+  // Filtrlangan o'quvchilar
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          student.parent.includes(searchTerm);
+    const matchesClass = selectedClass === '' || student.class === selectedClass;
+    return matchesSearch && matchesClass && student.status === 'active';
+  });
+
+  // Statistika hisoblash
+  const getStatistics = () => {
+    const total = filteredStudents.length;
+    const present = filteredStudents.filter(s => getAttendanceStatus(s.id) === 'present').length;
+    const absent = filteredStudents.filter(s => getAttendanceStatus(s.id) === 'absent').length;
+    const late = filteredStudents.filter(s => getAttendanceStatus(s.id) === 'late').length;
+    const attendanceRate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+    
+    return { total, present, absent, late, attendanceRate };
+  };
+
+  // Oylik statistika
+  const getMonthlyStats = (studentId) => {
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    let present = 0, absent = 0, late = 0;
     
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(selectedYear, selectedMonth, day);
-      const dayOfWeek = date.getDay();
+      const date = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const key = `${date}_${studentId}`;
+      const status = attendanceData[key];
+      if (status === 'present') present++;
+      else if (status === 'absent') absent++;
+      else if (status === 'late') late++;
+    }
+    
+    const total = present + absent + late;
+    const attendanceRate = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+    
+    return { present, absent, late, attendanceRate };
+  };
+
+  // Eksport qilish (CSV)
+  const exportToCSV = () => {
+    const stats = getStatistics();
+    const headers = ['ID', 'Ism', 'Sinf', 'Ota-ona tel', 'Holat', 'Kelish vaqti'];
+    const csvData = filteredStudents.map(s => {
+      const status = getAttendanceStatus(s.id);
+      let statusText = '';
+      let timeText = '';
       
-      // Faqat ish kunlari (1-5, dushanba-juma)
-      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-        let status = 'present';
-        let arrival = '08:00';
-        let note = '';
-        
-        // Random holatlar (demo uchun)
-        const random = Math.random();
-        if (random < 0.1) {
-          status = 'absent';
-          arrival = '-';
-          note = 'Kasallik sababli';
-        } else if (random < 0.15) {
-          status = 'late';
-          arrival = `08:${15 + Math.floor(Math.random() * 30)}`;
-          note = 'Kechikish';
-        } else if (random < 0.18) {
-          status = 'excused';
-          arrival = '09:00';
-          note = 'Shifokor qabulida';
-        } else {
-          status = 'present';
-          arrival = `07:${45 + Math.floor(Math.random() * 15)}`;
-        }
-        
-        records.push({
-          id: day,
-          date: date.toISOString().split('T')[0],
-          status,
-          arrival: arrival,
-          departure: '14:30',
-          note
-        });
+      if (status === 'present') {
+        statusText = '✅ Keldi';
+        timeText = new Date().toLocaleTimeString();
+      } else if (status === 'absent') {
+        statusText = '❌ Kelmadi';
+        timeText = '-';
+      } else if (status === 'late') {
+        statusText = '⏰ Kechikdi';
+        timeText = new Date().toLocaleTimeString();
+      } else {
+        statusText = '⚠️ Belgilanmagan';
+        timeText = '-';
       }
-    }
-    return records;
-  };
-
-  const calculateStats = (records) => {
-    const total = records.length;
-    const present = records.filter(r => r.status === 'present').length;
-    const late = records.filter(r => r.status === 'late').length;
-    const absent = records.filter(r => r.status === 'absent').length;
-    const excused = records.filter(r => r.status === 'excused').length;
-    const attendanceRate = total > 0 ? ((present + late) / total * 100).toFixed(1) : 0;
+      
+      return [s.id, s.name, s.class, s.parent, statusText, timeText];
+    });
     
-    setStats({ totalDays: total, present, late, absent, excused, attendanceRate });
-  };
-
-  const loadHomeworks = () => {
-    const stored = localStorage.getItem('homeworks');
-    if (stored) {
-      const allHomeworks = JSON.parse(stored);
-      // Faqat o'quvchining sinfiga tegishli va o'chirilmagan vazifalar
-      const filtered = allHomeworks.filter(hw => 
-        hw.class === studentInfo.class && 
-        !hw.isDeleted
-      );
-      setHomeworks(filtered);
-    } else {
-      // Demo ma'lumotlar
-      const demoHomeworks = [
-        { id: 1, title: 'Matematika 5-misol', subject: 'Matematika', class: studentInfo.class, dueDate: '2024-12-20', status: 'pending', description: '5-misolni yechish. 45-50 betlar.', teacher: 'Shahzoda Ahmedova', priority: 'high', createdAt: '2024-12-15' },
-        { id: 2, title: 'Fizika laboratoriya ishi', subject: 'Fizika', class: studentInfo.class, dueDate: '2024-12-18', status: 'submitted', description: 'Elektr zanjirlarini yig\'ish va hisoblash', teacher: 'Rustam Karimov', priority: 'medium', createdAt: '2024-12-14' },
-        { id: 3, title: 'Ingliz tili matn o\'qish', subject: 'Ingliz tili', class: studentInfo.class, dueDate: '2024-12-22', status: 'pending', description: 'Matnni o\'qish va tarjima qilish', teacher: 'Gulnora Saidova', priority: 'low', createdAt: '2024-12-16' }
-      ];
-      setHomeworks(demoHomeworks);
-    }
-  };
-
-  const loadSubmissions = () => {
-    const stored = localStorage.getItem('homework_submissions');
-    if (stored) {
-      const allSubmissions = JSON.parse(stored);
-      const mySubmissions = allSubmissions.filter(s => s.studentId === user?.id);
-      setSubmissions(mySubmissions);
-    } else {
-      setSubmissions([]);
-    }
-  };
-
-  const loadComments = () => {
-    const stored = localStorage.getItem('homework_comments');
-    if (stored) {
-      setComments(JSON.parse(stored));
-    } else {
-      setComments([]);
-    }
-  };
-
-  const getDaysLeft = (dueDate) => {
-    const today = new Date();
-    const due = new Date(dueDate);
-    const diffTime = due - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const handleSubmitHomework = (homeworkId) => {
-    if (!fileUpload) {
-      alert('Iltimos, fayl tanlang!');
-      return;
-    }
-
-    const fileUrl = URL.createObjectURL(fileUpload);
-    const newSubmission = {
-      id: Date.now(),
-      homeworkId,
-      studentId: user?.id,
-      studentName: user?.name,
-      submittedAt: new Date().toISOString().split('T')[0],
-      fileUrl: fileUrl,
-      fileName: fileUpload.name
-    };
+    const summary = [
+      [''],
+      ['DAVOMAT HISOBOTI'],
+      [`Sana: ${selectedDate}`],
+      [`Jami o'quvchilar: ${stats.total}`],
+      [`Keldi: ${stats.present}`],
+      [`Kelmadi: ${stats.absent}`],
+      [`Kechikdi: ${stats.late}`],
+      [`Davomat foizi: ${stats.attendanceRate}%`],
+      ['']
+    ];
     
-    const updatedSubmissions = [...submissions, newSubmission];
-    setSubmissions(updatedSubmissions);
-    localStorage.setItem('homework_submissions', JSON.stringify(updatedSubmissions));
-    
-    // Update homework status
-    const updatedHomeworks = homeworks.map(h => 
-      h.id === homeworkId ? { ...h, status: 'submitted' } : h
-    );
-    setHomeworks(updatedHomeworks);
-    localStorage.setItem('homeworks', JSON.stringify(updatedHomeworks));
-    
-    alert('Uy vazifasi muvaffaqiyatli topshirildi!');
-    setFileUpload(null);
+    const csvContent = [...summary, headers, ...csvData].map(row => row.join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_${selectedDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    
-    const newComment = {
-      id: Date.now(),
-      homeworkId: selectedHomeworkForComment.id,
-      text: commentText,
-      author: user?.name,
-      role: user?.role,
-      createdAt: new Date().toISOString()
-    };
-    
-    const updatedComments = [...comments, newComment];
-    setComments(updatedComments);
-    localStorage.setItem('homework_comments', JSON.stringify(updatedComments));
-    setCommentText('');
-    setShowCommentModal(false);
-    alert('Izoh qo\'shildi!');
+  // Chop etish
+  const handlePrint = () => {
+    window.print();
   };
 
-  const getStatusIcon = (status) => {
-    switch(status) {
-      case 'present': return <HiOutlineCheckCircle className="status-icon present" />;
-      case 'late': return <HiOutlineClock className="status-icon late" />;
-      case 'absent': return <HiOutlineXCircle className="status-icon absent" />;
-      case 'excused': return <HiOutlineCalendar className="status-icon excused" />;
-      default: return null;
-    }
+  // Barcha o'quvchilarni belgilash
+  const markAll = (status) => {
+    filteredStudents.forEach(student => {
+      markAttendance(student.id, status);
+    });
   };
 
-  const getStatusText = (status) => {
-    switch(status) {
-      case 'present': return 'Kelgan';
-      case 'late': return 'Kech kelgan';
-      case 'absent': return 'Kelmagan';
-      case 'excused': return 'Uzrli';
-      default: return status;
-    }
-  };
+  const stats = getStatistics();
 
-  const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+  // Hafta kunlari
+  const weekDays = ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba', 'Yakshanba'];
+  const currentDayOfWeek = new Date(selectedDate).getDay();
+  const adjustedDayOfWeek = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+
+  // Statistik karta komponenti
+  const StatCard = ({ title, value, icon, color, bgColor }) => (
+    <div className="attendance-stat-card" style={{ background: bgColor }}>
+      <div className="stat-icon" style={{ color }}>
+        {icon}
+      </div>
+      <div className="stat-content">
+        <div className="stat-value">{value}</div>
+        <div className="stat-title">{title}</div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="student-dashboard">
-      {/* Header */}
-      <div className="student-header">
-        <div className="student-welcome">
-          <div className="student-avatar">
-            {studentInfo.avatar}
-          </div>
-          <div>
-            <h1>Assalomu alaykum, {studentInfo.name}!</h1>
-            <p className="student-class">
-              <HiOutlineAcademicCap /> {studentInfo.class} sinf o'quvchisi
-            </p>
-          </div>
+    <div className="attendance-page">
+      <div className="page-header">
+        <div>
+          <h1>Davomat</h1>
+          <p>O'quvchilarning davomatini kuzatish va boshqarish</p>
         </div>
-        <div className="current-date">
-          <HiOutlineCalendar />
-          {new Date().toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        <div className="header-actions">
+          <button className="btn-secondary" onClick={handlePrint}>
+            <HiOutlinePrinter /> Chop etish
+          </button>
+          <button className="btn-primary" onClick={exportToCSV}>
+            <HiOutlineDownload /> Eksport
+          </button>
         </div>
       </div>
 
-      {/* Davomat bo'limi */}
-      <div className="section-card">
-        <div className="section-header">
-          <h2><HiOutlineCalendar /> Mening davomatim</h2>
-          <div className="month-selector">
-            <select 
-              value={selectedMonth} 
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-            >
-              {months.map((month, idx) => (
-                <option key={idx} value={idx}>{month}</option>
-              ))}
-            </select>
-            <select 
-              value={selectedYear} 
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            >
-              {[2023, 2024, 2025].map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+      {/* Statistika kartalari */}
+      <div className="attendance-stats-grid">
+        <StatCard 
+          title="Jami o'quvchilar" 
+          value={stats.total} 
+          icon={<HiOutlineUser />} 
+          color="#3b82f6"
+          bgColor="#eff6ff"
+        />
+        <StatCard 
+          title="Keldi" 
+          value={stats.present} 
+          icon={<HiOutlineCheckCircle />} 
+          color="#10b981"
+          bgColor="#f0fdf4"
+        />
+        <StatCard 
+          title="Kelmadi" 
+          value={stats.absent} 
+          icon={<HiOutlineXCircle />} 
+          color="#ef4444"
+          bgColor="#fef2f2"
+        />
+        <StatCard 
+          title="Kechikdi" 
+          value={stats.late} 
+          icon={<HiOutlineClock />} 
+          color="#f59e0b"
+          bgColor="#fffbeb"
+        />
+        <StatCard 
+          title="Davomat foizi" 
+          value={`${stats.attendanceRate}%`} 
+          icon={<HiOutlineChartBar />} 
+          color="#8b5cf6"
+          bgColor="#f5f3ff"
+        />
+      </div>
+
+      {/* Boshqaruv paneli */}
+      <div className="attendance-controls">
+        <div className="date-controls">
+          <div className="date-picker-wrapper">
+            <HiOutlineCalendar />
+            <input 
+              type="date" 
+              value={selectedDate} 
+              onChange={(e) => setSelectedDate(e.target.value)} 
+              className="date-picker"
+            />
+          </div>
+          <div className="day-info">
+            <span className="day-badge">{weekDays[adjustedDayOfWeek]}</span>
           </div>
         </div>
 
-        {/* Davomat statistikasi */}
-        <div className="attendance-stats-grid">
-          <div className="stat-card-small">
-            <div className="stat-value">{stats.attendanceRate}%</div>
-            <div className="stat-label">Davomat foizi</div>
+        <div className="filter-controls">
+          <div className="search-wrapper">
+            <HiOutlineSearch />
+            <input 
+              type="text" 
+              placeholder="Ism yoki ota-ona telefon bo'yicha qidirish..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
           </div>
-          <div className="stat-card-small present">
-            <div className="stat-value">{stats.present}</div>
-            <div className="stat-label">Kelgan</div>
-          </div>
-          <div className="stat-card-small late">
-            <div className="stat-value">{stats.late}</div>
-            <div className="stat-label">Kech kelgan</div>
-          </div>
-          <div className="stat-card-small absent">
-            <div className="stat-value">{stats.absent}</div>
-            <div className="stat-label">Kelmagan</div>
-          </div>
+          <select 
+            className="class-select" 
+            value={selectedClass} 
+            onChange={(e) => setSelectedClass(e.target.value)}
+          >
+            <option value="">Barcha sinflar</option>
+            {classes.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
 
-        {/* Progress bar */}
-        <div className="attendance-progress">
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${stats.attendanceRate}%` }}
-            ></div>
-          </div>
-          <p className="progress-text">
-            Jami {stats.totalDays} kundan {stats.present + stats.late} kun qatnashgan
-          </p>
-        </div>
-
-        {/* Davomat jadvali */}
-        <div className="attendance-calendar">
-          <div className="calendar-grid">
-            {attendanceRecords.map(record => (
-              <div 
-                key={record.id} 
-                className={`calendar-day ${record.status}`}
-                title={`${record.date}: ${getStatusText(record.status)}${record.note ? ` - ${record.note}` : ''}`}
-              >
-                <span className="day-number">{new Date(record.date).getDate()}</span>
-                {getStatusIcon(record.status)}
-              </div>
-            ))}
-          </div>
+        <div className="bulk-actions">
+          <button className="bulk-btn present" onClick={() => markAll('present')}>
+            <HiOutlineCheckCircle /> Hammasini keldi
+          </button>
+          <button className="bulk-btn absent" onClick={() => markAll('absent')}>
+            <HiOutlineXCircle /> Hammasini kelmadi
+          </button>
+          <button className="bulk-btn late" onClick={() => markAll('late')}>
+            <HiOutlineClock /> Hammasini kechikdi
+          </button>
         </div>
       </div>
 
-      {/* Uy vazifalari bo'limi */}
-      <div className="section-card">
-        <div className="section-header">
-          <h2><HiOutlineDocumentText /> Uy vazifalarim</h2>
-          <p className="section-subtitle">
-            {homeworks.filter(h => h.status === 'pending').length} ta bajarilmagan vazifa
-          </p>
-        </div>
-
-        <div className="homework-list">
-          {homeworks.length === 0 ? (
-            <div className="empty-state">
-              <HiOutlineBookOpen size={48} />
-              <p>Hozircha uy vazifalari yo'q</p>
-            </div>
-          ) : (
-            homeworks.map(hw => {
-              const daysLeft = getDaysLeft(hw.dueDate);
-              const isOverdue = daysLeft < 0 && hw.status === 'pending';
-              const submission = submissions.find(s => s.homeworkId === hw.id);
-              const homeworkComments = comments.filter(c => c.homeworkId === hw.id);
-              
-              return (
-                <div key={hw.id} className={`homework-item ${hw.priority} ${hw.status === 'submitted' ? 'submitted' : ''}`}>
-                  <div className="homework-item-header">
-                    <div>
-                      <h3>{hw.title}</h3>
-                      <div className="homework-meta">
-                        <span className="subject">{hw.subject}</span>
-                        <span className="teacher">
-                          <HiOutlineUser /> {hw.teacher}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="homework-badges">
-                      <span className={`priority-badge ${hw.priority}`}>
-                        {hw.priority === 'high' ? '🔴 Muhim' : hw.priority === 'medium' ? '🟡 O\'rta' : '🟢 Oddiy'}
-                      </span>
-                      <span className={`status-badge ${hw.status}`}>
-                        {hw.status === 'pending' ? '⏳ Bajarilmagan' : '✅ Topshirilgan'}
-                      </span>
-                      {isOverdue && (
-                        <span className="overdue-badge">
-                          <HiOutlineExclamationCircle /> Muddati o'tgan
-                        </span>
-                      )}
-                      {!isOverdue && daysLeft <= 3 && daysLeft > 0 && hw.status === 'pending' && (
-                        <span className="deadline-badge">
-                          <HiOutlineClock /> {daysLeft} kun qoldi
-                        </span>
-                      )}
-                    </div>
+      {/* Davomat jadvali */}
+      <div className="attendance-table-container">
+        <table className="attendance-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>O'quvchi ismi</th>
+              <th>Sinf</th>
+              <th>Ota-ona telefoni</th>
+              <th>Davomat holati</th>
+              <th>Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredStudents.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="empty-table">
+                  <div className="empty-state">
+                    <HiOutlineUser size={48} />
+                    <p>Hech qanday o'quvchi topilmadi</p>
                   </div>
-
-                  <p className="homework-description">{hw.description}</p>
-                  
-                  <div className="homework-footer">
-                    <div className="homework-date">
-                      <HiOutlineCalendar /> 
-                      Muddati: {new Date(hw.dueDate).toLocaleDateString('uz-UZ')}
-                    </div>
-                    
-                    <div className="homework-actions">
-                      <button 
-                        className="view-btn"
-                        onClick={() => {
-                          setSelectedHomework(hw);
-                          setShowHomeworkDetails(true);
-                        }}
-                      >
-                        <HiOutlineEye /> Ko'rish
-                      </button>
-                      
-                      {hw.status === 'pending' && !submission && (
-                        <>
-                          <input 
-                            type="file" 
-                            id={`file-${hw.id}`}
-                            onChange={(e) => setFileUpload(e.target.files[0])}
-                            className="file-input"
-                            accept=".pdf,.doc,.docx,.jpg,.png"
-                          />
-                          <label htmlFor={`file-${hw.id}`} className="file-label">
-                            📎 Fayl tanlash
-                          </label>
-                          {fileUpload && (
-                            <button 
-                              className="submit-btn"
-                              onClick={() => handleSubmitHomework(hw.id)}
-                            >
-                              <HiOutlineUpload /> Topshirish
-                            </button>
-                          )}
-                        </>
-                      )}
-                      
-                      {submission && (
-                        <div className="submitted-info">
-                          ✅ Topshirilgan: {submission.submittedAt}
-                          {submission.fileUrl && (
-                            <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer">
-                              Faylni ko'rish
-                            </a>
-                          )}
+                </td>
+              </tr>
+            ) : (
+              filteredStudents.map((student, index) => {
+                const status = getAttendanceStatus(student.id);
+                return (
+                  <tr key={student.id}>
+                    <td>{index + 1}</td>
+                    <td>
+                      <div className="student-info">
+                        <div className="student-avatar">{student.name.charAt(0)}</div>
+                        <div className="student-details">
+                          <div className="student-name">{student.name}</div>
+                          <div className="student-email">{student.email}</div>
                         </div>
-                      )}
-                      
-                      <button 
-                        className="comment-btn"
-                        onClick={() => {
-                          setSelectedHomeworkForComment(hw);
-                          setShowCommentModal(true);
-                        }}
-                      >
-                        <HiOutlineChat /> Izoh ({homeworkComments.length})
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                      </div>
+                    </td>
+                    <td><span className="class-badge">{student.class}</span></td>
+                    <td>{student.parent}</td>
+                    <td>
+                      <div className="status-indicator">
+                        {status === 'present' && (
+                          <span className="status-badge present">
+                            <HiOutlineCheckCircle /> Keldi
+                          </span>
+                        )}
+                        {status === 'absent' && (
+                          <span className="status-badge absent">
+                            <HiOutlineXCircle /> Kelmadi
+                          </span>
+                        )}
+                        {status === 'late' && (
+                          <span className="status-badge late">
+                            <HiOutlineClock /> Kechikdi
+                          </span>
+                        )}
+                        {!status && (
+                          <span className="status-badge pending">
+                            <HiOutlineClock /> Belgilanmagan
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="attendance-actions">
+                        <button 
+                          className={`attendance-btn present ${status === 'present' ? 'active' : ''}`}
+                          onClick={() => markAttendance(student.id, 'present')}
+                          title="Keldi"
+                        >
+                          <HiOutlineCheckCircle />
+                        </button>
+                        <button 
+                          className={`attendance-btn absent ${status === 'absent' ? 'active' : ''}`}
+                          onClick={() => markAttendance(student.id, 'absent')}
+                          title="Kelmadi"
+                        >
+                          <HiOutlineXCircle />
+                        </button>
+                        <button 
+                          className={`attendance-btn late ${status === 'late' ? 'active' : ''}`}
+                          onClick={() => markAttendance(student.id, 'late')}
+                          title="Kechikdi"
+                        >
+                          <HiOutlineClock />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
-      {/* Homework Details Modal */}
-      {showHomeworkDetails && selectedHomework && (
-        <div className="modal-overlay" onClick={() => setShowHomeworkDetails(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>📋 {selectedHomework.title}</h2>
-              <button className="modal-close" onClick={() => setShowHomeworkDetails(false)}>
-                <HiOutlineX />
+      {/* Statistika toggle */}
+      <div className="stats-toggle">
+        <button 
+          className={`toggle-btn ${showStats ? 'active' : ''}`}
+          onClick={() => setShowStats(!showStats)}
+        >
+          <HiOutlineChartBar /> Oylik statistika
+        </button>
+      </div>
+
+      {/* Oylik statistika jadvali */}
+      {showStats && (
+        <div className="monthly-stats">
+          <div className="stats-header">
+            <h3>Oylik davomat statistikasi</h3>
+            <div className="month-navigation">
+              <button onClick={() => setCurrentMonth(prev => prev === 0 ? 11 : prev - 1)}>
+                <HiOutlineChevronLeft />
               </button>
-            </div>
-            <div className="modal-body">
-              <div className="detail-row">
-                <span className="detail-label">Fan:</span>
-                <span className="detail-value">{selectedHomework.subject}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">O'qituvchi:</span>
-                <span className="detail-value">{selectedHomework.teacher}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Muddati:</span>
-                <span className="detail-value">{selectedHomework.dueDate}</span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Tavsif:</span>
-                <p className="detail-description">{selectedHomework.description}</p>
-              </div>
-              
-              <div className="comments-section">
-                <h4>💬 Izohlar</h4>
-                {comments.filter(c => c.homeworkId === selectedHomework.id).length === 0 ? (
-                  <p className="no-comments">Hech qanday izoh yo'q</p>
-                ) : (
-                  comments.filter(c => c.homeworkId === selectedHomework.id).map(c => (
-                    <div key={c.id} className="comment-item">
-                      <div className="comment-header">
-                        <span className="comment-author">{c.author}</span>
-                        <span className="comment-date">{new Date(c.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <p className="comment-text">{c.text}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-            <div className="modal-buttons">
-              <button className="btn-secondary" onClick={() => setShowHomeworkDetails(false)}>
-                Yopish
+              <span>{`${currentYear} - ${currentMonth + 1}`}</span>
+              <button onClick={() => setCurrentMonth(prev => prev === 11 ? 0 : prev + 1)}>
+                <HiOutlineChevronRight />
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Comment Modal */}
-      {showCommentModal && (
-        <div className="modal-overlay" onClick={() => setShowCommentModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>💬 Izoh qoldirish</h2>
-              <button className="modal-close" onClick={() => setShowCommentModal(false)}>
-                <HiOutlineX />
-              </button>
-            </div>
-            <div className="modal-body">
-              <textarea 
-                rows="4" 
-                placeholder="Izohingizni yozing..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              />
-            </div>
-            <div className="modal-buttons">
-              <button className="btn-primary" onClick={handleAddComment}>
-                Yuborish
-              </button>
-              <button className="btn-secondary" onClick={() => setShowCommentModal(false)}>
-                Bekor qilish
-              </button>
-            </div>
+          <div className="stats-table-container">
+            <table className="stats-table">
+              <thead>
+                <tr>
+                  <th>O'quvchi</th>
+                  <th>Sinf</th>
+                  <th>Keldi</th>
+                  <th>Kelmadi</th>
+                  <th>Kechikdi</th>
+                  <th>Davomat %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map(student => {
+                  const monthlyStats = getMonthlyStats(student.id);
+                  return (
+                    <tr key={student.id}>
+                      <td>{student.name}</td>
+                      <td>{student.class}</td>
+                      <td className="stats-present">{monthlyStats.present}</td>
+                      <td className="stats-absent">{monthlyStats.absent}</td>
+                      <td className="stats-late">{monthlyStats.late}</td>
+                      <td>
+                        <div className="stats-percentage">
+                          <div 
+                            className="percentage-bar" 
+                            style={{ width: `${monthlyStats.attendanceRate}%` }}
+                          ></div>
+                          <span>{monthlyStats.attendanceRate}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -573,4 +467,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard;
+export default Attendance;

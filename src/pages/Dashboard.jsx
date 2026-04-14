@@ -41,17 +41,52 @@ ChartJS.register(
   Filler
 );
 
-const Dashboard = () => {
+const Dashboard = ({ onNavigate }) => {
   const [selectedYear, setSelectedYear] = useState('2024');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Statistik ma'lumotlar
+  // Statistik ma'lumotlar - navigatsiya qo'shilgan
   const stats = [
-    { title: 'Jami o\'quvchilar', value: '1,234', icon: HiOutlineUsers, color: '#10b981', trend: { type: 'up', value: 12 } },
-    { title: 'Jami o\'qituvchilar', value: '48', icon: HiOutlineUserGroup, color: '#3b82f6', trend: { type: 'up', value: 5 } },
-    { title: 'Jami sinflar', value: '24', icon: HiOutlineAcademicCap, color: '#f59e0b', trend: { type: 'down', value: 2 } },
-    { title: 'Oylik daromad', value: '$12,345', icon: HiOutlineCurrencyDollar, color: '#8b5cf6', trend: { type: 'up', value: 18 } },
+    { 
+      title: 'Jami o\'quvchilar', 
+      value: '1,234', 
+      icon: HiOutlineUsers, 
+      color: '#10b981', 
+      trend: { type: 'up', value: 12 },
+      navigateTo: 'students'  // Qaysi sahifaga o'tish
+    },
+    { 
+      title: 'Jami o\'qituvchilar', 
+      value: '48', 
+      icon: HiOutlineUserGroup, 
+      color: '#3b82f6', 
+      trend: { type: 'up', value: 5 },
+      navigateTo: 'teachers'
+    },
+    { 
+      title: 'Jami sinflar', 
+      value: '24', 
+      icon: HiOutlineAcademicCap, 
+      color: '#f59e0b', 
+      trend: { type: 'down', value: 2 },
+      navigateTo: 'classes'
+    },
+    { 
+      title: 'Oylik daromad', 
+      value: '$12,345', 
+      icon: HiOutlineCurrencyDollar, 
+      color: '#8b5cf6', 
+      trend: { type: 'up', value: 18 },
+      navigateTo: 'payments'
+    },
   ];
+
+  // Karta bosilganda ishlaydigan funksiya
+  const handleStatClick = (navigateTo) => {
+    if (onNavigate && navigateTo) {
+      onNavigate(navigateTo);
+    }
+  };
 
   // O'quvchilar o'sishi chart
   const growthChartData = {
@@ -205,10 +240,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Statistik kartalar */}
+      {/* Statistik kartalar - onClick qo'shildi */}
       <div className="stats-grid">
         {stats.map((stat, index) => (
-          <Card key={index} {...stat} />
+          <div key={index} onClick={() => handleStatClick(stat.navigateTo)} style={{ cursor: 'pointer' }}>
+            <Card {...stat} />
+          </div>
         ))}
       </div>
 
@@ -226,6 +263,14 @@ const Dashboard = () => {
           </div>
           <div className="chart-container">
             <Line data={growthChartData} options={chartOptions} />
+          </div>
+          <div className="chart-footer">
+            <button 
+              className="chart-nav-btn" 
+              onClick={() => onNavigate && onNavigate('students')}
+            >
+              <HiOutlineTrendingUp /> Batafsil ma'lumot
+            </button>
           </div>
         </div>
 
@@ -249,6 +294,12 @@ const Dashboard = () => {
               <span className="summary-value">88%</span>
             </div>
           </div>
+          <button 
+            className="chart-nav-btn" 
+            onClick={() => onNavigate && onNavigate('attendance')}
+          >
+            Batafsil
+          </button>
         </div>
 
         {/* Baholar taqsimoti */}
@@ -263,6 +314,12 @@ const Dashboard = () => {
             <div className="grade-item bad">Qoniqarli (3) - 20%</div>
             <div className="grade-item worst">Qoniqarsiz (2) - 5%</div>
           </div>
+          <button 
+            className="chart-nav-btn" 
+            onClick={() => onNavigate && onNavigate('grades')}
+          >
+            Batafsil
+          </button>
         </div>
 
         {/* So'nggi faoliyat */}
@@ -293,11 +350,21 @@ const Dashboard = () => {
         <div className="chart-card full-width">
           <div className="card-header">
             <h3><HiOutlineStar /> Eng yaxshi o'quvchilar</h3>
-            <button className="view-all-btn">Barchasini ko'rish</button>
+            <button 
+              className="view-all-btn" 
+              onClick={() => onNavigate && onNavigate('students')}
+            >
+              Barchasini ko'rish
+            </button>
           </div>
           <div className="top-students">
             {topStudents.map((student, index) => (
-              <div key={index} className="student-rank">
+              <div 
+                key={index} 
+                className="student-rank"
+                onClick={() => onNavigate && onNavigate('students')}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className={`rank rank-${student.rank}`}>
                   {student.rank === 1 && '🥇'}
                   {student.rank === 2 && '🥈'}
@@ -327,7 +394,12 @@ const Dashboard = () => {
           <h3><HiOutlineCalendar /> Kutilayotgan tadbirlar</h3>
           <div className="events-list">
             {upcomingEvents.map((event, index) => (
-              <div key={index} className={`event-item ${event.type}`}>
+              <div 
+                key={index} 
+                className={`event-item ${event.type}`}
+                onClick={() => onNavigate && onNavigate('events')}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="event-date">
                   <span className="event-day">{new Date(event.date).getDate()}</span>
                   <span className="event-month">{new Date(event.date).toLocaleString('uz', { month: 'short' })}</span>

@@ -177,12 +177,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 10px;
-  border-radius: 12px;
+  padding: 10px 16px; /* 🔥 kattaroq qildik */
+  border-radius: 14px;
   cursor: pointer;
   transition: background 0.2s;
+  font-size: 14px; /* 🔥 matn kattalashadi */
+  min-height: 44px; /* 🔥 height qo‘shdik */
+  background: #fff;
+  border: 1px solid #e5e7eb;
 }
-
 .profile__trigger:hover {
   background: #f8fafc;
 }
