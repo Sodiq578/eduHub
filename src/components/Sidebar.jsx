@@ -35,6 +35,7 @@ import {
   HiOutlineCube
 } from 'react-icons/hi';
 import './Sidebar.css';
+import Logo from '../assets/logo.svg';
 
 // Icon map - YANGI ICOONLAR QO'SHILDI
 const iconMap = {
@@ -64,6 +65,8 @@ const iconMap = {
   HiOutlinePayroll,
   HiOutlineCube
 };
+
+
 
 // Kategoriyalar va ularning menyulari
 const menuCategories = {
@@ -217,8 +220,8 @@ const Sidebar = ({ isOpen, activePage, setActivePage, toggleSidebar }) => {
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <div className="logo-glow"></div>
-            <span className="sidebar-logo-icon">📚</span>
-            <span className="sidebar-logo-text">Edu<span>Manage</span></span>
+       <img src={Logo} alt="Logo" />
+       
           </div>
           <button className="sidebar-close-btn" onClick={toggleSidebar}>
             <HiOutlineX />
