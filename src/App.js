@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -60,202 +60,548 @@ import {
   HiOutlineBell,
   HiOutlineBriefcase,
   HiOutlineTrendingUp,
-  HiOutlineCube
+  HiOutlineCube,
+  HiOutlineCog,
+  HiOutlineLogout,
+  HiOutlineSupport,
+  HiOutlineInformationCircle
 } from 'react-icons/hi';
 import './App.css';
 
 function AppContent() {
-  const { isAuthenticated, user, roles } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = React.useState(window.innerWidth > 768);
-  const [activePage, setActivePage] = React.useState('dashboard');
+  const { isAuthenticated, user, roles, logout, hasPermission } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    if (saved !== null) return JSON.parse(saved);
+    return window.innerWidth > 768;
+  });
+  const [activePage, setActivePage] = useState(() => {
+    return localStorage.getItem('activePage') || 'dashboard';
+  });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
+  const [breadcrumbs, setBreadcrumbs] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  React.useEffect(() => {
+  // Sahifa nomlari va iconlari
+  const pageConfig = useMemo(() => ({
+    dashboard: { name: 'Dashboard', icon: HiOutlineViewGrid, roles: ['admin', 'teacher', 'student', 'parent', 'finance', 'librarian'] },
+    students: { name: "O'quvchilar", icon: HiOutlineUsers, roles: ['admin', 'teacher'] },
+    teachers: { name: "O'qituvchilar", icon: HiOutlineUserGroup, roles: ['admin'] },
+    classes: { name: 'Sinflar', icon: HiOutlineAcademicCap, roles: ['admin', 'teacher'] },
+    subjects: { name: 'Fanlar', icon: HiOutlineBookOpen, roles: ['admin', 'teacher'] },
+    attendance: { name: 'Davomat', icon: HiOutlineCalendar, roles: ['admin', 'teacher', 'student', 'parent'] },
+    grades: { name: 'Baholar', icon: HiOutlineStar, roles: ['admin', 'teacher', 'student', 'parent'] },
+    exams: { name: 'Imtihonlar', icon: HiOutlineDocumentText, roles: ['admin', 'teacher'] },
+    homework: { name: 'Uy vazifalari', icon: HiOutlineClipboardList, roles: ['admin', 'teacher', 'student'] },
+    schedule: { name: 'Dars jadvali', icon: HiOutlineTable, roles: ['admin', 'teacher', 'student', 'parent'] },
+    messages: { name: 'Xabarlar', icon: HiOutlineChat, roles: ['admin', 'teacher', 'student', 'parent'] },
+    announcements: { name: "E'lonlar", icon: HiOutlineSpeakerphone, roles: ['admin', 'teacher', 'student', 'parent'] },
+    payments: { name: "To'lovlar", icon: HiOutlineCreditCard, roles: ['admin', 'finance', 'parent'] },
+    reports: { name: 'Hisobotlar', icon: HiOutlineChartBar, roles: ['admin', 'finance'] },
+    payroll: { name: 'Oyliklar', icon: HiOutlineCreditCard, roles: ['admin', 'finance'] },
+    library: { name: 'Kutubxona', icon: HiOutlineBookOpen, roles: ['admin', 'librarian', 'teacher', 'student'] },
+    cafeteria: { name: 'Ovqatlanish', icon: HiOutlineCreditCard, roles: ['admin', 'finance', 'teacher', 'student', 'parent'] },
+    health: { name: "Sog'liq", icon: HiOutlineHeart, roles: ['admin', 'teacher', 'student', 'parent'] },
+    transport: { name: 'Transport', icon: HiOutlineTruck, roles: ['admin', 'teacher', 'student', 'parent'] },
+    surveys: { name: "So'rovnomalar", icon: HiOutlineChartBar, roles: ['admin', 'teacher', 'student', 'parent'] },
+    notifications: { name: 'Ogohlantirishlar', icon: HiOutlineBell, roles: ['admin', 'teacher', 'student', 'parent'] },
+    discipline: { name: 'Mukofot/Intizom', icon: HiOutlineStar, roles: ['admin', 'teacher'] },
+    livechat: { name: 'Live Chat', icon: HiOutlineChat, roles: ['admin', 'teacher', 'student', 'parent'] },
+    staff: { name: 'Xodimlar', icon: HiOutlineBriefcase, roles: ['admin'] },
+    alumni: { name: 'Bitiruvchilar', icon: HiOutlineAcademicCap, roles: ['admin'] },
+    analytics: { name: 'Analitika', icon: HiOutlineTrendingUp, roles: ['admin', 'teacher'] },
+    admissions: { name: 'Qabul', icon: HiOutlineDocumentText, roles: ['admin'] },
+    parents: { name: 'Ota-onalar', icon: HiOutlineUsers, roles: ['admin'] },
+    events: { name: 'Tadbirlar', icon: HiOutlineCalendar, roles: ['admin', 'teacher', 'student', 'parent'] },
+    documents: { name: 'Hujjatlar', icon: HiOutlineDocumentText, roles: ['admin', 'teacher', 'student', 'parent'] },
+    inventory: { name: 'Inventar', icon: HiOutlineCube, roles: ['admin'] },
+    users: { name: 'Foydalanuvchilar', icon: HiOutlineUserGroup, roles: ['admin'] },
+    profile: { name: 'Profil', icon: HiOutlineUserCircle, roles: ['admin', 'teacher', 'student', 'parent', 'finance', 'librarian'] },
+    settings: { name: 'Sozlamalar', icon: HiOutlineCog, roles: ['admin', 'teacher', 'student', 'parent'] },
+    help: { name: 'Yordam', icon: HiOutlineSupport, roles: ['admin', 'teacher', 'student', 'parent'] },
+    about: { name: "Dastur haqida", icon: HiOutlineInformationCircle, roles: ['admin', 'teacher', 'student', 'parent'] }
+  }), []);
+
+  // Resize handler
+  useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 768) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setShowMobileSidebar(false);
+        const saved = localStorage.getItem('sidebarOpen');
+        if (saved === null) {
+          setSidebarOpen(true);
+        }
       }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (!isAuthenticated) return <Login />;
+  // Save sidebar state
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen));
+  }, [sidebarOpen]);
 
-  // Barcha sahifalar uchun umumiy props
-  const commonProps = { onNavigate: setActivePage };
+  // Save active page
+  useEffect(() => {
+    localStorage.setItem('activePage', activePage);
+    updateBreadcrumbs(activePage);
+  }, [activePage]);
 
-  const renderPage = () => {
-    switch(activePage) {
-      case 'dashboard': return <Dashboard {...commonProps} />;
-      case 'students': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Students {...commonProps} /> : <AccessDenied />;
-      case 'teachers': return user?.role === roles.ADMIN ? <Teachers {...commonProps} /> : <AccessDenied />;
-      case 'classes': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Classes {...commonProps} /> : <AccessDenied />;
-      case 'subjects': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Subjects {...commonProps} /> : <AccessDenied />;
-      case 'attendance': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Attendance {...commonProps} /> : <AccessDenied />;
-      case 'grades': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Grades {...commonProps} /> : user?.role === roles.STUDENT || user?.role === roles.PARENT ? <ParentPanel {...commonProps} /> : <AccessDenied />;
-      case 'exams': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Exams {...commonProps} /> : <AccessDenied />;
-      case 'homework': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Homework {...commonProps} /> : <AccessDenied />;
-      case 'schedule': return <Schedule {...commonProps} />;
-      case 'payments': return user?.role === roles.ADMIN || user?.role === roles.FINANCE || user?.role === roles.PARENT ? <Payments {...commonProps} /> : <AccessDenied />;
-      case 'reports': return user?.role === roles.ADMIN || user?.role === roles.FINANCE ? <Reports {...commonProps} /> : <AccessDenied />;
-      case 'payroll': return user?.role === roles.ADMIN || user?.role === roles.FINANCE ? <Payroll {...commonProps} /> : <AccessDenied />;
-      case 'library': return <Library {...commonProps} />;
-      case 'cafeteria': return <Cafeteria {...commonProps} />;
-      case 'health': return <Health {...commonProps} />;
-      case 'transport': return <Transport {...commonProps} />;
-      case 'messages': return <Messages {...commonProps} />;
-      case 'announcements': return <Announcements {...commonProps} />;
-      case 'surveys': return <Surveys {...commonProps} />;
-      case 'notifications': return <Notifications {...commonProps} />;
-      case 'discipline': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Discipline {...commonProps} /> : <AccessDenied />;
-      case 'livechat': return <LiveChat {...commonProps} />;
-      case 'staff': return user?.role === roles.ADMIN ? <Staff {...commonProps} /> : <AccessDenied />;
-      case 'alumni': return user?.role === roles.ADMIN ? <Alumni {...commonProps} /> : <AccessDenied />;
-      case 'admissions': return user?.role === roles.ADMIN ? <Admissions {...commonProps} /> : <AccessDenied />;
-      case 'parents': return user?.role === roles.ADMIN ? <Parents {...commonProps} /> : <AccessDenied />;
-      case 'events': return <Events {...commonProps} />;
-      case 'documents': return <Documents {...commonProps} />;
-      case 'inventory': return user?.role === roles.ADMIN ? <Inventory {...commonProps} /> : <AccessDenied />;
-      case 'users': return user?.role === roles.ADMIN ? <Users {...commonProps} /> : <AccessDenied />;
-      case 'analytics': return user?.role === roles.ADMIN || user?.role === roles.TEACHER ? <Analytics {...commonProps} /> : <AccessDenied />;
-      case 'profile': return <Profile {...commonProps} />;
-      default: return <Dashboard {...commonProps} />;
+  // Update breadcrumbs
+  const updateBreadcrumbs = useCallback((pageId) => {
+    const config = pageConfig[pageId];
+    if (config) {
+      setBreadcrumbs([
+        { id: 'dashboard', name: 'Dashboard', path: '/' },
+        { id: pageId, name: config.name, path: `/${pageId}` }
+      ]);
     }
-  };
+  }, [pageConfig]);
 
-  const AccessDenied = () => (
+  // Toggle favorite
+  const toggleFavorite = useCallback((pageId) => {
+    setFavorites(prev => {
+      const newFavorites = prev.includes(pageId)
+        ? prev.filter(id => id !== pageId)
+        : [...prev, pageId];
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  }, []);
+
+  // Navigate function with loading
+  const handleNavigate = useCallback((pageId, options = {}) => {
+    if (pageLoading) return;
+    
+    setPageLoading(true);
+    setActivePage(pageId);
+    
+    if (options.scrollToTop !== false) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    if (isMobile) {
+      setShowMobileSidebar(false);
+    }
+    
+    setTimeout(() => setPageLoading(false), 300);
+  }, [pageLoading, isMobile]);
+
+  // Toggle sidebar
+  const toggleSidebar = useCallback(() => {
+    if (isMobile) {
+      setShowMobileSidebar(prev => !prev);
+    } else {
+      setSidebarOpen(prev => !prev);
+    }
+  }, [isMobile]);
+
+  // Get sidebar items based on user role
+  const getSidebarItems = useCallback(() => {
+    const allItems = [];
+    
+    // Dashboard har doim
+    allItems.push({ id: 'dashboard', name: 'Dashboard', icon: HiOutlineViewGrid });
+    
+    // Asosiy bo'limlar
+    if (hasPermission('students')) allItems.push({ id: 'students', name: "O'quvchilar", icon: HiOutlineUsers });
+    if (hasPermission('teachers')) allItems.push({ id: 'teachers', name: "O'qituvchilar", icon: HiOutlineUserGroup });
+    if (hasPermission('classes')) allItems.push({ id: 'classes', name: 'Sinflar', icon: HiOutlineAcademicCap });
+    if (hasPermission('subjects')) allItems.push({ id: 'subjects', name: 'Fanlar', icon: HiOutlineBookOpen });
+    
+    // Akademik bo'lim
+    if (hasPermission('attendance')) allItems.push({ id: 'attendance', name: 'Davomat', icon: HiOutlineCalendar });
+    if (hasPermission('grades')) allItems.push({ id: 'grades', name: 'Baholar', icon: HiOutlineStar });
+    if (hasPermission('exams')) allItems.push({ id: 'exams', name: 'Imtihonlar', icon: HiOutlineDocumentText });
+    if (hasPermission('homework')) allItems.push({ id: 'homework', name: 'Uy vazifalari', icon: HiOutlineClipboardList });
+    if (hasPermission('schedule')) allItems.push({ id: 'schedule', name: 'Dars jadvali', icon: HiOutlineTable });
+    
+    // Moliya bo'limi
+    if (hasPermission('payments')) allItems.push({ id: 'payments', name: "To'lovlar", icon: HiOutlineCreditCard });
+    if (hasPermission('reports')) allItems.push({ id: 'reports', name: 'Hisobotlar', icon: HiOutlineChartBar });
+    if (hasPermission('payroll')) allItems.push({ id: 'payroll', name: 'Oyliklar', icon: HiOutlineCreditCard });
+    
+    // Xizmatlar
+    if (hasPermission('library')) allItems.push({ id: 'library', name: 'Kutubxona', icon: HiOutlineBookOpen });
+    if (hasPermission('cafeteria')) allItems.push({ id: 'cafeteria', name: 'Ovqatlanish', icon: HiOutlineCreditCard });
+    if (hasPermission('health')) allItems.push({ id: 'health', name: "Sog'liq", icon: HiOutlineHeart });
+    if (hasPermission('transport')) allItems.push({ id: 'transport', name: 'Transport', icon: HiOutlineTruck });
+    
+    // Kommunikatsiya
+    if (hasPermission('messages')) allItems.push({ id: 'messages', name: 'Xabarlar', icon: HiOutlineChat });
+    if (hasPermission('announcements')) allItems.push({ id: 'announcements', name: "E'lonlar", icon: HiOutlineSpeakerphone });
+    if (hasPermission('notifications')) allItems.push({ id: 'notifications', name: 'Ogohlantirishlar', icon: HiOutlineBell });
+    if (hasPermission('livechat')) allItems.push({ id: 'livechat', name: 'Live Chat', icon: HiOutlineChat });
+    if (hasPermission('events')) allItems.push({ id: 'events', name: 'Tadbirlar', icon: HiOutlineCalendar });
+    
+    // Admin bo'limi
+    if (user?.role === 'admin') {
+      allItems.push({ id: 'staff', name: 'Xodimlar', icon: HiOutlineBriefcase });
+      allItems.push({ id: 'alumni', name: 'Bitiruvchilar', icon: HiOutlineAcademicCap });
+      allItems.push({ id: 'analytics', name: 'Analitika', icon: HiOutlineTrendingUp });
+      allItems.push({ id: 'admissions', name: 'Qabul', icon: HiOutlineDocumentText });
+      allItems.push({ id: 'parents', name: 'Ota-onalar', icon: HiOutlineUsers });
+      allItems.push({ id: 'documents', name: 'Hujjatlar', icon: HiOutlineDocumentText });
+      allItems.push({ id: 'inventory', name: 'Inventar', icon: HiOutlineCube });
+      allItems.push({ id: 'users', name: 'Foydalanuvchilar', icon: HiOutlineUserGroup });
+      allItems.push({ id: 'surveys', name: "So'rovnomalar", icon: HiOutlineChartBar });
+      allItems.push({ id: 'discipline', name: 'Mukofot/Intizom', icon: HiOutlineStar });
+    }
+    
+    // Teacher qo'shimcha
+    if (user?.role === 'teacher') {
+      allItems.push({ id: 'discipline', name: 'Mukofot/Intizom', icon: HiOutlineStar });
+      allItems.push({ id: 'analytics', name: 'Analitika', icon: HiOutlineTrendingUp });
+    }
+    
+    // Profil va sozlamalar
+    allItems.push({ id: 'profile', name: 'Profil', icon: HiOutlineUserCircle });
+    allItems.push({ id: 'settings', name: 'Sozlamalar', icon: HiOutlineCog });
+    allItems.push({ id: 'help', name: 'Yordam', icon: HiOutlineSupport });
+    
+    return allItems;
+  }, [user, hasPermission]);
+
+  // Filter sidebar items by search
+  const filteredSidebarItems = useMemo(() => {
+    const items = getSidebarItems();
+    if (!searchQuery) return items;
+    
+    return items.filter(item => 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [getSidebarItems, searchQuery]);
+
+  // Access denied component
+  const AccessDenied = useCallback(() => (
     <div className="access-denied">
-      <div className="access-denied-icon">🔒</div>
-      <h2>Kirish huquqi yo'q</h2>
-      <p>Sizga bu sahifani ko'rish uchun ruxsat berilmagan.</p>
-      <button className="btn-primary" onClick={() => setActivePage('dashboard')}>
-        Dashboardga qaytish
-      </button>
+      <div className="access-denied-icon">
+        <HiOutlineUserCircle />
+      </div>
+      <div className="access-denied-content">
+        <h2>Kirish huquqi yo'q</h2>
+        <p>Sizga bu sahifani ko'rish uchun ruxsat berilmagan.</p>
+        <div className="access-denied-actions">
+          <button className="btn-primary" onClick={() => handleNavigate('dashboard')}>
+            Dashboardga qaytish
+          </button>
+          <button className="btn-secondary" onClick={() => handleNavigate('profile')}>
+            Profilim
+          </button>
+        </div>
+      </div>
     </div>
-  );
+  ), [handleNavigate]);
 
-  const getSidebarItems = () => {
-    const items = [
-      { id: 'dashboard', name: 'Dashboard', icon: HiOutlineViewGrid },
-      { id: 'students', name: 'O\'quvchilar', icon: HiOutlineUsers },
-      { id: 'attendance', name: 'Davomat', icon: HiOutlineCalendar },
-      { id: 'grades', name: 'Baholar', icon: HiOutlineStar },
-      { id: 'schedule', name: 'Dars jadvali', icon: HiOutlineTable },
-      { id: 'messages', name: 'Xabarlar', icon: HiOutlineChat },
-      { id: 'announcements', name: 'E\'lonlar', icon: HiOutlineSpeakerphone },
-      { id: 'notifications', name: 'Ogohlantirishlar', icon: HiOutlineBell },
-      { id: 'livechat', name: 'Live Chat', icon: HiOutlineChat },
-      { id: 'events', name: 'Tadbirlar', icon: HiOutlineCalendar },
-      { id: 'profile', name: 'Profil', icon: HiOutlineUserCircle },
-    ];
+  // Check page permission
+  const hasPagePermission = useCallback((pageId) => {
+    const config = pageConfig[pageId];
+    if (!config) return false;
+    if (!config.roles) return true;
+    return config.roles.includes(user?.role);
+  }, [user, pageConfig]);
 
-    if (user?.role === roles.ADMIN) {
-      items.splice(2, 0, { id: 'teachers', name: 'O\'qituvchilar', icon: HiOutlineUserGroup });
-      items.splice(3, 0, { id: 'classes', name: 'Sinflar', icon: HiOutlineAcademicCap });
-      items.splice(4, 0, { id: 'subjects', name: 'Fanlar', icon: HiOutlineBookOpen });
-      items.push({ id: 'exams', name: 'Imtihonlar', icon: HiOutlineDocumentText });
-      items.push({ id: 'homework', name: 'Uy vazifalari', icon: HiOutlineClipboardList });
-      items.push({ id: 'payments', name: 'To\'lovlar', icon: HiOutlineCreditCard });
-      items.push({ id: 'reports', name: 'Hisobotlar', icon: HiOutlineChartBar });
-      items.push({ id: 'payroll', name: 'Oyliklar', icon: HiOutlineCreditCard });
-      items.push({ id: 'users', name: 'Foydalanuvchilar', icon: HiOutlineUserGroup });
-      items.push({ id: 'library', name: 'Kutubxona', icon: HiOutlineBookOpen });
-      items.push({ id: 'cafeteria', name: 'Ovqatlanish', icon: HiOutlineCreditCard });
-      items.push({ id: 'health', name: 'Sog\'liq', icon: HiOutlineHeart });
-      items.push({ id: 'transport', name: 'Transport', icon: HiOutlineTruck });
-      items.push({ id: 'surveys', name: 'So\'rovnomalar', icon: HiOutlineChartBar });
-      items.push({ id: 'staff', name: 'Xodimlar', icon: HiOutlineBriefcase });
-      items.push({ id: 'alumni', name: 'Bitiruvchilar', icon: HiOutlineAcademicCap });
-      items.push({ id: 'discipline', name: 'Mukofot/Intizom', icon: HiOutlineStar });
-      items.push({ id: 'analytics', name: 'Analitika', icon: HiOutlineTrendingUp });
-      items.push({ id: 'admissions', name: 'Qabul', icon: HiOutlineDocumentText });
-      items.push({ id: 'parents', name: 'Ota-onalar', icon: HiOutlineUsers });
-      items.push({ id: 'documents', name: 'Hujjatlar', icon: HiOutlineDocumentText });
-      items.push({ id: 'inventory', name: 'Inventar', icon: HiOutlineCube });
+  // Render current page
+  const renderPage = useCallback(() => {
+    if (!hasPagePermission(activePage)) {
+      return <AccessDenied />;
     }
 
-    if (user?.role === roles.TEACHER) {
-      items.push({ id: 'exams', name: 'Imtihonlar', icon: HiOutlineDocumentText });
-      items.push({ id: 'homework', name: 'Uy vazifalari', icon: HiOutlineClipboardList });
-      items.push({ id: 'cafeteria', name: 'Ovqatlanish', icon: HiOutlineCreditCard });
-      items.push({ id: 'health', name: 'Sog\'liq', icon: HiOutlineHeart });
-      items.push({ id: 'discipline', name: 'Mukofot/Intizom', icon: HiOutlineStar });
-      items.push({ id: 'analytics', name: 'Analitika', icon: HiOutlineTrendingUp });
-    }
+    const commonProps = { 
+      onNavigate: handleNavigate,
+      user,
+      roles,
+      hasPermission
+    };
 
-    if (user?.role === roles.PARENT) {
-      return [
-        { id: 'dashboard', name: 'Farzandim', icon: HiOutlineUser },
-        { id: 'grades', name: 'Baholar', icon: HiOutlineStar },
-        { id: 'attendance', name: 'Davomat', icon: HiOutlineCalendar },
-        { id: 'payments', name: 'To\'lovlar', icon: HiOutlineCreditCard },
-        { id: 'cafeteria', name: 'Ovqatlanish', icon: HiOutlineCreditCard },
-        { id: 'notifications', name: 'Ogohlantirishlar', icon: HiOutlineBell },
-        { id: 'announcements', name: 'E\'lonlar', icon: HiOutlineSpeakerphone },
-        { id: 'events', name: 'Tadbirlar', icon: HiOutlineCalendar },
-        { id: 'livechat', name: 'Live Chat', icon: HiOutlineChat },
-        { id: 'profile', name: 'Profil', icon: HiOutlineUserCircle }
-      ];
-    }
+    const pageMap = {
+      dashboard: <Dashboard {...commonProps} />,
+      students: <Students {...commonProps} />,
+      teachers: <Teachers {...commonProps} />,
+      classes: <Classes {...commonProps} />,
+      subjects: <Subjects {...commonProps} />,
+      attendance: <Attendance {...commonProps} />,
+      grades: user?.role === 'parent' ? <ParentPanel {...commonProps} /> : <Grades {...commonProps} />,
+      payments: <Payments {...commonProps} />,
+      exams: <Exams {...commonProps} />,
+      homework: <Homework {...commonProps} />,
+      schedule: <Schedule {...commonProps} />,
+      messages: <Messages {...commonProps} />,
+      announcements: <Announcements {...commonProps} />,
+      profile: <Profile {...commonProps} />,
+      reports: <Reports {...commonProps} />,
+      users: <Users {...commonProps} />,
+      library: <Library {...commonProps} />,
+      cafeteria: <Cafeteria {...commonProps} />,
+      health: <Health {...commonProps} />,
+      transport: <Transport {...commonProps} />,
+      surveys: <Surveys {...commonProps} />,
+      notifications: <Notifications {...commonProps} />,
+      staff: <Staff {...commonProps} />,
+      alumni: <Alumni {...commonProps} />,
+      discipline: <Discipline {...commonProps} />,
+      analytics: <Analytics {...commonProps} />,
+      livechat: <LiveChat {...commonProps} />,
+      admissions: <Admissions {...commonProps} />,
+      parents: <Parents {...commonProps} />,
+      events: <Events {...commonProps} />,
+      documents: <Documents {...commonProps} />,
+      payroll: <Payroll {...commonProps} />,
+      inventory: <Inventory {...commonProps} />,
+      settings: <Settings {...commonProps} />,
+      help: <Help {...commonProps} />,
+      about: <About {...commonProps} />
+    };
 
-    if (user?.role === roles.FINANCE) {
-      return [
-        { id: 'dashboard', name: 'Dashboard', icon: HiOutlineViewGrid },
-        { id: 'payments', name: 'To\'lovlar', icon: HiOutlineCreditCard },
-        { id: 'reports', name: 'Hisobotlar', icon: HiOutlineChartBar },
-        { id: 'payroll', name: 'Oyliklar', icon: HiOutlineCreditCard },
-        { id: 'cafeteria', name: 'Ovqatlanish', icon: HiOutlineCreditCard },
-        { id: 'profile', name: 'Profil', icon: HiOutlineUserCircle }
-      ];
-    }
+    return pageMap[activePage] || <Dashboard {...commonProps} />;
+  }, [activePage, user, roles, hasPermission, handleNavigate, AccessDenied, hasPagePermission]);
 
-    if (user?.role === roles.LIBRARIAN) {
-      return [
-        { id: 'dashboard', name: 'Dashboard', icon: HiOutlineViewGrid },
-        { id: 'library', name: 'Kutubxona', icon: HiOutlineBookOpen },
-        { id: 'profile', name: 'Profil', icon: HiOutlineUserCircle }
-      ];
-    }
+  // Loading screen
+  if (pageLoading) {
+    return (
+      <div className="app-loading">
+        <div className="loading-spinner"></div>
+        <p>Yuklanmoqda...</p>
+      </div>
+    );
+  }
 
-    if (user?.role === roles.STUDENT) {
-      return [
-        { id: 'dashboard', name: 'Dashboard', icon: HiOutlineViewGrid },
-        { id: 'grades', name: 'Baholarim', icon: HiOutlineStar },
-        { id: 'attendance', name: 'Davomatim', icon: HiOutlineCalendar },
-        { id: 'homework', name: 'Uy vazifalari', icon: HiOutlineClipboardList },
-        { id: 'schedule', name: 'Dars jadvali', icon: HiOutlineTable },
-        { id: 'cafeteria', name: 'Ovqatlanish', icon: HiOutlineCreditCard },
-        { id: 'notifications', name: 'Ogohlantirishlar', icon: HiOutlineBell },
-        { id: 'messages', name: 'Xabarlar', icon: HiOutlineChat },
-        { id: 'announcements', name: 'E\'lonlar', icon: HiOutlineSpeakerphone },
-        { id: 'events', name: 'Tadbirlar', icon: HiOutlineCalendar },
-        { id: 'livechat', name: 'Live Chat', icon: HiOutlineChat },
-        { id: 'profile', name: 'Profil', icon: HiOutlineUserCircle }
-      ];
-    }
-
-    return items;
-  };
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={() => handleNavigate('dashboard')} />;
+  }
 
   return (
     <div className="app">
+      {/* Sidebar Overlay for mobile */}
+      {isMobile && showMobileSidebar && (
+        <div className="sidebar-overlay" onClick={() => setShowMobileSidebar(false)} />
+      )}
+      
+      {/* Sidebar */}
       <Sidebar 
-        isOpen={sidebarOpen} 
-        activePage={activePage} 
-        setActivePage={setActivePage} 
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
-        menuItems={getSidebarItems()} 
+        isOpen={isMobile ? showMobileSidebar : sidebarOpen}
+        activePage={activePage}
+        setActivePage={handleNavigate}
+        toggleSidebar={toggleSidebar}
+        menuItems={filteredSidebarItems}
+        favorites={favorites}
+        toggleFavorite={toggleFavorite}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        isMobile={isMobile}
       />
-      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-        <div className="page-wrapper">{renderPage()}</div>
+      
+      {/* Main Content */}
+      <div className={`main-content ${sidebarOpen && !isMobile ? 'sidebar-open' : 'sidebar-closed'}`}>
+        <Navbar 
+          toggleSidebar={toggleSidebar}
+          onSearch={(query) => setSearchQuery(query)}
+          activePage={activePage}
+          pageTitle={pageConfig[activePage]?.name}
+          breadcrumbs={breadcrumbs}
+          onNavigate={handleNavigate}
+          favorites={favorites}
+          toggleFavorite={() => toggleFavorite(activePage)}
+        />
+        
+        <div className="page-wrapper">
+          {renderPage()}
+        </div>
       </div>
-      <AiAssistant />
+      
+      {/* AI Assistant */}
+      <AiAssistant user={user} onNavigate={handleNavigate} />
     </div>
   );
 }
+
+// Settings Page Component
+const Settings = ({ onNavigate, user }) => {
+  const [settings, setSettings] = useState({
+    theme: localStorage.getItem('theme') || 'light',
+    language: localStorage.getItem('language') || 'uz',
+    notifications: JSON.parse(localStorage.getItem('notifications') || 'true'),
+    sound: JSON.parse(localStorage.getItem('sound') || 'true'),
+    autoRefresh: JSON.parse(localStorage.getItem('autoRefresh') || 'true'),
+    compactMode: JSON.parse(localStorage.getItem('compactMode') || 'false')
+  });
+
+  const handleChange = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+    localStorage.setItem(key, value);
+    
+    if (key === 'theme') {
+      document.body.setAttribute('data-theme', value);
+    }
+  };
+
+  return (
+    <div className="settings-page">
+      <div className="page-header">
+        <h1>Sozlamalar</h1>
+        <p>Hisobingiz va ilova sozlamalarini boshqaring</p>
+      </div>
+      
+      <div className="settings-grid">
+        <div className="settings-card">
+          <h3>Ko'rinish</h3>
+          <div className="setting-item">
+            <label>Mavzu</label>
+            <select value={settings.theme} onChange={(e) => handleChange('theme', e.target.value)}>
+              <option value="light">Yorug'</option>
+              <option value="dark">Qorong'u</option>
+              <option value="auto">Avto</option>
+            </select>
+          </div>
+          <div className="setting-item">
+            <label>Til</label>
+            <select value={settings.language} onChange={(e) => handleChange('language', e.target.value)}>
+              <option value="uz">O'zbekcha</option>
+              <option value="ru">Русский</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div className="setting-item">
+            <label>Yilni rejim</label>
+            <input 
+              type="checkbox" 
+              checked={settings.compactMode} 
+              onChange={(e) => handleChange('compactMode', e.target.checked)}
+            />
+          </div>
+        </div>
+        
+        <div className="settings-card">
+          <h3>Bildirishnomalar</h3>
+          <div className="setting-item">
+            <label>Bildirishnomalarni yoqish</label>
+            <input 
+              type="checkbox" 
+              checked={settings.notifications} 
+              onChange={(e) => handleChange('notifications', e.target.checked)}
+            />
+          </div>
+          <div className="setting-item">
+            <label>Ovozli bildirishnomalar</label>
+            <input 
+              type="checkbox" 
+              checked={settings.sound} 
+              onChange={(e) => handleChange('sound', e.target.checked)}
+            />
+          </div>
+          <div className="setting-item">
+            <label>Avto yangilash</label>
+            <input 
+              type="checkbox" 
+              checked={settings.autoRefresh} 
+              onChange={(e) => handleChange('autoRefresh', e.target.checked)}
+            />
+          </div>
+        </div>
+        
+        <div className="settings-card">
+          <h3>Hisob</h3>
+          <div className="setting-item">
+            <label>Ism</label>
+            <input type="text" value={user?.name || ''} readOnly disabled />
+          </div>
+          <div className="setting-item">
+            <label>Email</label>
+            <input type="email" value={user?.email || ''} readOnly disabled />
+          </div>
+          <div className="setting-item">
+            <label>Rol</label>
+            <input type="text" value={user?.role || ''} readOnly disabled />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Help Page Component
+const Help = ({ onNavigate }) => {
+  const helpTopics = [
+    { title: "Qanday qilib o'quvchi qo'shish mumkin?", page: "students" },
+    { title: "Davomatni qanday belgilash mumkin?", page: "attendance" },
+    { title: "Baholarni qanday kiritish mumkin?", page: "grades" },
+    { title: "To'lovlarni qanday qabul qilish mumkin?", page: "payments" },
+    { title: "Hisobotlarni qanday yuklab olish mumkin?", page: "reports" }
+  ];
+
+  return (
+    <div className="help-page">
+      <div className="page-header">
+        <h1>Yordam</h1>
+        <p>Tez-tez beriladigan savollar va qo'llanmalar</p>
+      </div>
+      
+      <div className="help-grid">
+        {helpTopics.map((topic, index) => (
+          <div key={index} className="help-card" onClick={() => onNavigate(topic.page)}>
+            <div className="help-icon">❓</div>
+            <h3>{topic.title}</h3>
+            <p>Batafsil ma'lumot olish uchun bosing</p>
+          </div>
+        ))}
+      </div>
+      
+      <div className="contact-support">
+        <h3>Yordam kerakmi?</h3>
+        <p>Qo'llab-quvvatlash xizmatiga murojaat qiling</p>
+        <button className="btn-primary" onClick={() => onNavigate('messages')}>
+          Xabar yuborish
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// About Page Component
+const About = () => (
+  <div className="about-page">
+    <div className="page-header">
+      <h1>Dastur haqida</h1>
+      <p>EduManage - zamonaviy ta'lim boshqaruvi tizimi</p>
+    </div>
+    
+    <div className="about-content">
+      <div className="about-logo">
+        <div className="logo-icon">📚</div>
+        <h2>EduManage</h2>
+        <p>Version 2.0.0</p>
+      </div>
+      
+      <div className="about-features">
+        <h3>Asosiy xususiyatlar</h3>
+        <ul>
+          <li>✓ O'quvchilar va o'qituvchilarni boshqarish</li>
+          <li>✓ Davomat va baholarni kuzatish</li>
+          <li>✓ To'lovlarni boshqarish</li>
+          <li>✓ Hisobotlar va analitika</li>
+          <li>✓ Xabarlar va bildirishnomalar</li>
+          <li>✓ AI yordamchi</li>
+        </ul>
+      </div>
+      
+      <div className="about-contact">
+        <h3>Bog'lanish</h3>
+        <p>Email: support@edumanage.uz</p>
+        <p>Tel: +998 71 123 45 67</p>
+        <p>© 2024 EduManage. Barcha huquqlar himoyalangan.</p>
+      </div>
+    </div>
+  </div>
+);
 
 function App() {
   return (
