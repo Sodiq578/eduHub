@@ -18,6 +18,24 @@ export const AuthProvider = ({ children }) => {
     LIBRARIAN: 'librarian'
   };
 
+  const roleLabels = {
+    [roles.ADMIN]: 'Administrator',
+    [roles.TEACHER]: 'O\'qituvchi',
+    [roles.STUDENT]: 'O\'quvchi',
+    [roles.PARENT]: 'Ota-ona',
+    [roles.FINANCE]: 'Moliyachi',
+    [roles.LIBRARIAN]: 'Kutubxonachi'
+  };
+
+  const roleColors = {
+    [roles.ADMIN]: '#10b981',
+    [roles.TEACHER]: '#3b82f6',
+    [roles.STUDENT]: '#f59e0b',
+    [roles.PARENT]: '#8b5cf6',
+    [roles.FINANCE]: '#ef4444',
+    [roles.LIBRARIAN]: '#06b6d4'
+  };
+
   const roleMenus = {
     [roles.ADMIN]: [
       { id: 'dashboard', name: 'Dashboard', icon: 'HiOutlineViewGrid' },
@@ -64,12 +82,6 @@ export const AuthProvider = ({ children }) => {
       { id: 'schedule', name: 'Dars jadvali', icon: 'HiOutlineTable' },
       { id: 'messages', name: 'Xabarlar', icon: 'HiOutlineChat' },
       { id: 'announcements', name: 'E\'lonlar', icon: 'HiOutlineSpeakerphone' },
-      { id: 'cafeteria', name: 'Ovqatlanish', icon: 'HiOutlineCreditCard' },
-      { id: 'health', name: 'Sog\'liq', icon: 'HiOutlineHeart' },
-      { id: 'discipline', name: 'Mukofot/Intizom', icon: 'HiOutlineStar' },
-      { id: 'analytics', name: 'Analitika', icon: 'HiOutlineTrendingUp' },
-      { id: 'livechat', name: 'Live Chat', icon: 'HiOutlineChat' },
-      { id: 'events', name: 'Tadbirlar', icon: 'HiOutlineCalendar' },
       { id: 'profile', name: 'Profil', icon: 'HiOutlineUserCircle' }
     ],
     [roles.STUDENT]: [
@@ -78,15 +90,9 @@ export const AuthProvider = ({ children }) => {
       { id: 'attendance', name: 'Davomatim', icon: 'HiOutlineCalendar' },
       { id: 'homework', name: 'Uy vazifalari', icon: 'HiOutlineClipboardList' },
       { id: 'schedule', name: 'Dars jadvali', icon: 'HiOutlineTable' },
-      { id: 'library', name: 'Kutubxona', icon: 'HiOutlineBookOpen' },  // ✅ O'quvchi uchun kutubxona qo'shildi
-      { id: 'attendance', name: 'Davomat', icon: 'HiOutlineCalendar' },
-
-      { id: 'cafeteria', name: 'Ovqatlanish', icon: 'HiOutlineCreditCard' },
-      { id: 'notifications', name: 'Ogohlantirishlar', icon: 'HiOutlineBell' },
+      { id: 'library', name: 'Kutubxona', icon: 'HiOutlineBookOpen' },
       { id: 'messages', name: 'Xabarlar', icon: 'HiOutlineChat' },
       { id: 'announcements', name: 'E\'lonlar', icon: 'HiOutlineSpeakerphone' },
-      { id: 'events', name: 'Tadbirlar', icon: 'HiOutlineCalendar' },
-      { id: 'livechat', name: 'Live Chat', icon: 'HiOutlineChat' },
       { id: 'profile', name: 'Profil', icon: 'HiOutlineUserCircle' }
     ],
     [roles.PARENT]: [
@@ -94,12 +100,8 @@ export const AuthProvider = ({ children }) => {
       { id: 'grades', name: 'Baholar', icon: 'HiOutlineStar' },
       { id: 'attendance', name: 'Davomat', icon: 'HiOutlineCalendar' },
       { id: 'payments', name: 'To\'lovlar', icon: 'HiOutlineCreditCard' },
-      { id: 'cafeteria', name: 'Ovqatlanish', icon: 'HiOutlineCreditCard' },
-      { id: 'notifications', name: 'Ogohlantirishlar', icon: 'HiOutlineBell' },
       { id: 'messages', name: 'Xabarlar', icon: 'HiOutlineChat' },
       { id: 'announcements', name: 'E\'lonlar', icon: 'HiOutlineSpeakerphone' },
-      { id: 'events', name: 'Tadbirlar', icon: 'HiOutlineCalendar' },
-      { id: 'livechat', name: 'Live Chat', icon: 'HiOutlineChat' },
       { id: 'profile', name: 'Profil', icon: 'HiOutlineUserCircle' }
     ],
     [roles.FINANCE]: [
@@ -107,7 +109,6 @@ export const AuthProvider = ({ children }) => {
       { id: 'payments', name: 'To\'lovlar', icon: 'HiOutlineCreditCard' },
       { id: 'reports', name: 'Hisobotlar', icon: 'HiOutlineChartBar' },
       { id: 'payroll', name: 'Oyliklar', icon: 'HiOutlineCreditCard' },
-      { id: 'cafeteria', name: 'Ovqatlanish', icon: 'HiOutlineCreditCard' },
       { id: 'profile', name: 'Profil', icon: 'HiOutlineUserCircle' }
     ],
     [roles.LIBRARIAN]: [
@@ -119,109 +120,112 @@ export const AuthProvider = ({ children }) => {
 
   const pagePermissions = {
     [roles.ADMIN]: {
-      dashboard: true,
-      students: true,
-      teachers: true,
-      classes: true,
-      subjects: true,
-      attendance: true,
-      grades: true,
-      exams: true,
-      homework: true,
-      schedule: true,
-      messages: true,
-      announcements: true,
-      payments: true,
-      reports: true,
-      users: true,
-      library: true,
-      cafeteria: true,
-      health: true,
-      transport: true,
-      surveys: true,
-      notifications: true,
-      staff: true,
-      alumni: true,
-      discipline: true,
-      analytics: true,
-      livechat: true,
-      admissions: true,
-      parents: true,
-      events: true,
-      documents: true,
-      payroll: true,
-      inventory: true,
-      profile: true
+      dashboard: true, students: true, teachers: true, classes: true,
+      subjects: true, attendance: true, grades: true, exams: true,
+      homework: true, schedule: true, messages: true, announcements: true,
+      payments: true, reports: true, users: true, library: true,
+      cafeteria: true, health: true, transport: true, surveys: true,
+      notifications: true, staff: true, alumni: true, discipline: true,
+      analytics: true, livechat: true, admissions: true, parents: true,
+      events: true, documents: true, payroll: true, inventory: true, profile: true
     },
     [roles.TEACHER]: {
-      dashboard: true,
-      students: true,
-      attendance: true,
-      grades: true,
-      exams: true,
-      homework: true,
-      schedule: true,
-      messages: true,
-      announcements: true,
-      cafeteria: true,
-      health: true,
-      discipline: true,
-      analytics: true,
-      livechat: true,
-      events: true,
-      profile: true
+      dashboard: true, students: true, attendance: true, grades: true,
+      exams: true, homework: true, schedule: true, messages: true,
+      announcements: true, profile: true
     },
     [roles.STUDENT]: {
-      dashboard: true,
-      grades: true,
-      attendance: true,
-      homework: true,
-      schedule: true,
-      library: true,  // ✅ O'quvchi kutubxonani ko'ra oladi
-      cafeteria: true,
-      notifications: true,
-      messages: true,
-      announcements: true,
-      events: true,
-      livechat: true,
-      profile: true
+      dashboard: true, grades: true, attendance: true, homework: true,
+      schedule: true, library: true, messages: true, announcements: true, profile: true
     },
     [roles.PARENT]: {
-      dashboard: true,
-      grades: true,
-      attendance: true,
-      payments: true,
-      cafeteria: true,
-      notifications: true,
-      messages: true,
-      announcements: true,
-      events: true,
-      livechat: true,
-      profile: true
+      dashboard: true, grades: true, attendance: true, payments: true,
+      messages: true, announcements: true, profile: true
     },
     [roles.FINANCE]: {
-      dashboard: true,
-      payments: true,
-      reports: true,
-      payroll: true,
-      cafeteria: true,
-      profile: true
+      dashboard: true, payments: true, reports: true, payroll: true, profile: true
     },
     [roles.LIBRARIAN]: {
-      dashboard: true,
-      library: true,
-      profile: true
+      dashboard: true, library: true, profile: true
     }
   };
 
   const initializeUsers = () => {
     return [
-      { id: 1, name: 'Admin User', email: 'admin@edumanage.com', password: 'admin123', role: roles.ADMIN, avatar: 'A', status: 'active' },
-      { id: 2, name: 'Shahzoda Ahmedova', email: 'teacher@edumanage.com', password: 'teacher123', role: roles.TEACHER, avatar: 'S', status: 'active', subject: 'Matematika' },
-      { id: 3, name: 'Ali Valiyev', email: 'student@edumanage.com', password: 'student123', role: roles.STUDENT, avatar: 'A', status: 'active', class: '10-A', parentId: 4 },
-      { id: 4, name: 'Vali Valiyev', email: 'parent@edumanage.com', password: 'parent123', role: roles.PARENT, avatar: 'V', status: 'active', childId: 3 },
-      { id: 5, name: 'Finance Officer', email: 'finance@edumanage.com', password: 'finance123', role: roles.FINANCE, avatar: 'F', status: 'active' },
-      { id: 6, name: 'Librarian', email: 'librarian@edumanage.com', password: 'lib123', role: roles.LIBRARIAN, avatar: 'L', status: 'active' }
+      { 
+        id: 1, 
+        name: 'Admin User', 
+        email: 'admin@edumanage.com', 
+        password: 'admin123', 
+        role: roles.ADMIN, 
+        avatar: 'A', 
+        status: 'active',
+        registerDate: '2024-01-01',
+        phone: '+998901234567',
+        address: 'Toshkent shahri'
+      },
+      { 
+        id: 2, 
+        name: 'Shahzoda Ahmedova', 
+        email: 'teacher@edumanage.com', 
+        password: 'teacher123', 
+        role: roles.TEACHER, 
+        avatar: 'S', 
+        status: 'active', 
+        subject: 'Matematika',
+        experience: 8,
+        phone: '+998902345678',
+        registerDate: '2024-01-15'
+      },
+      { 
+        id: 3, 
+        name: 'Ali Valiyev', 
+        email: 'student@edumanage.com', 
+        password: 'student123', 
+        role: roles.STUDENT, 
+        avatar: 'A', 
+        status: 'active', 
+        class: '10-A', 
+        parentId: 4,
+        phone: '+998903456789',
+        address: 'Chilonzor tumani',
+        registerDate: '2024-09-01'
+      },
+      { 
+        id: 4, 
+        name: 'Vali Valiyev', 
+        email: 'parent@edumanage.com', 
+        password: 'parent123', 
+        role: roles.PARENT, 
+        avatar: 'V', 
+        status: 'active', 
+        childId: 3,
+        childName: 'Ali Valiyev',
+        phone: '+998904567890',
+        registerDate: '2024-09-01'
+      },
+      { 
+        id: 5, 
+        name: 'Finance Officer', 
+        email: 'finance@edumanage.com', 
+        password: 'finance123', 
+        role: roles.FINANCE, 
+        avatar: 'F', 
+        status: 'active',
+        phone: '+998905678901',
+        registerDate: '2024-02-01'
+      },
+      { 
+        id: 6, 
+        name: 'Librarian', 
+        email: 'librarian@edumanage.com', 
+        password: 'lib123', 
+        role: roles.LIBRARIAN, 
+        avatar: 'L', 
+        status: 'active',
+        phone: '+998906789012',
+        registerDate: '2024-03-01'
+      }
     ];
   };
 
@@ -244,7 +248,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (email, password) => {
-    const foundUser = users.find(u => u.email === email && u.password === password);
+    const foundUser = users.find(u => u.email === email && u.password === password && u.status === 'active');
     if (foundUser) {
       const { password: _, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
@@ -252,7 +256,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('current_user', JSON.stringify(userWithoutPassword));
       return { success: true, user: userWithoutPassword };
     }
-    return { success: false, message: 'Email yoki parol noto\'g\'ri!' };
+    return { success: false, message: 'Email yoki parol noto\'g\'ri yoki hisob noaktiv!' };
   };
 
   const logout = () => {
@@ -290,19 +294,26 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('system_users', JSON.stringify(updatedUsers));
   };
 
+  const getUserById = (id) => {
+    return users.find(u => u.id === id);
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
       users,
       isAuthenticated,
       roles,
+      roleLabels,
+      roleColors,
       login,
       logout,
       hasPermission,
       getUserMenus,
       addUser,
       updateUser,
-      deleteUser
+      deleteUser,
+      getUserById
     }}>
       {children}
     </AuthContext.Provider>

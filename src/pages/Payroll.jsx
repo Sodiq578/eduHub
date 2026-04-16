@@ -10,9 +10,29 @@ import {
   HiOutlineUser,
   HiOutlineCash,
   HiOutlineCheckCircle,
-  HiOutlineClock
+  HiOutlineClock,
+  HiOutlineEye,
+  HiOutlinePrinter,
+  HiOutlineFilter,
+  HiOutlineRefresh,
+  HiOutlineChevronDown,
+  HiOutlineChevronUp,
+  HiOutlineDocumentText,
+  HiOutlineChartBar,
+  HiOutlineTrendingUp,
+  HiOutlineTrendingDown,
+  HiOutlineCreditCard,
+  HiOutlineReceiptTax,
+  HiOutlineUserGroup,
+  HiOutlineOfficeBuilding,
+  HiOutlineCurrencyDollar,
+  HiOutlineCalculator,
+  HiOutlineExclamationCircle,
+  HiOutlineBookOpen,
+  HiOutlineUsers
 } from 'react-icons/hi';
 import './Payroll.css';
+import Logo from '../assets/logo.svg';
 
 const Payroll = () => {
   const [payrolls, setPayrolls] = useState([]);
@@ -21,12 +41,18 @@ const Payroll = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [showModal, setShowModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [selectedPayroll, setSelectedPayroll] = useState(null);
   const [editingPayroll, setEditingPayroll] = useState(null);
+  const [openAccordionId, setOpenAccordionId] = useState(null);
+  const [salaryHistory, setSalaryHistory] = useState([]);
 
   // LOAD DATA
   useEffect(() => {
     loadPayrolls();
     loadTeachers();
+    loadSalaryHistory();
   }, []);
 
   const loadPayrolls = () => {
@@ -34,24 +60,90 @@ const Payroll = () => {
     if (stored) {
       setPayrolls(JSON.parse(stored));
     } else {
-      const defaultData = [
-        { id: 1, teacherName: 'Shahzoda Ahmedova', teacherId: 1, month: '2024-12', baseSalary: 5000000, bonus: 500000, deduction: 0, total: 5500000, status: 'paid', paymentDate: '2024-12-20' },
-        { id: 2, teacherName: 'Rustam Karimov', teacherId: 2, month: '2024-12', baseSalary: 4800000, bonus: 300000, deduction: 0, total: 5100000, status: 'pending', paymentDate: '' },
-        { id: 3, teacherName: 'Gulnora Saidova', teacherId: 3, month: '2024-12', baseSalary: 4500000, bonus: 200000, deduction: 0, total: 4700000, status: 'paid', paymentDate: '2024-12-19' },
-      ];
+      const defaultData = generateDefaultPayrolls();
       setPayrolls(defaultData);
       localStorage.setItem('payroll', JSON.stringify(defaultData));
     }
   };
 
+  const generateDefaultPayrolls = () => {
+    const teachersList = [
+      { id: 1, name: 'Shahzoda Ahmedova', subject: 'Matematika', baseSalary: 5000000 },
+      { id: 2, name: 'Rustam Karimov', subject: 'Fizika', baseSalary: 4800000 },
+      { id: 3, name: 'Gulnora Saidova', subject: 'Ona tili', baseSalary: 4500000 },
+      { id: 4, name: 'Bobur Aliyev', subject: 'Ingliz tili', baseSalary: 5200000 },
+      { id: 5, name: 'Dilshod Karimov', subject: 'Tarix', baseSalary: 4600000 },
+      { id: 6, name: 'Nodira Ismoilova', subject: 'Biologiya', baseSalary: 4700000 }
+    ];
+    
+    const months = ['2024-09', '2024-10', '2024-11', '2024-12', '2025-01', '2025-02'];
+    const payrollsList = [];
+    
+    for (let i = 0; i < teachersList.length; i++) {
+      for (let j = 0; j < months.length; j++) {
+        const bonus = Math.floor(Math.random() * 500000);
+        const deduction = Math.floor(Math.random() * 100000);
+        const total = teachersList[i].baseSalary + bonus - deduction;
+        const status = Math.random() > 0.3 ? 'paid' : 'pending';
+        const paymentDate = status === 'paid' ? `2024-${Math.floor(Math.random() * 12) + 1}-${Math.floor(Math.random() * 28) + 1}` : '';
+        
+        payrollsList.push({
+          id: i * months.length + j + 1,
+          teacherName: teachersList[i].name,
+          teacherId: teachersList[i].id,
+          subject: teachersList[i].subject,
+          month: months[j],
+          baseSalary: teachersList[i].baseSalary,
+          bonus: bonus,
+          deduction: deduction,
+          total: total,
+          status: status,
+          paymentDate: paymentDate,
+          paymentMethod: ['Naqd', 'Plastik', 'Bank', 'Click'][Math.floor(Math.random() * 4)],
+          receiptNo: `PR-${String(2024000 + i * months.length + j).slice(-6)}`,
+          description: status === 'paid' ? "To'lov qabul qilindi" : "To'lov kutilmoqda"
+        });
+      }
+    }
+    return payrollsList;
+  };
+
   const loadTeachers = () => {
     const storedTeachers = JSON.parse(localStorage.getItem('teachers') || '[]');
-    setTeachers(storedTeachers);
+    if (storedTeachers.length === 0) {
+      const defaultTeachers = [
+        { id: 1, name: 'Shahzoda Ahmedova', subject: 'Matematika', phone: '+998901234567', email: 'shahzoda@school.uz', experience: 8, baseSalary: 5000000 },
+        { id: 2, name: 'Rustam Karimov', subject: 'Fizika', phone: '+998902345678', email: 'rustam@school.uz', experience: 5, baseSalary: 4800000 },
+        { id: 3, name: 'Gulnora Saidova', subject: 'Ona tili', phone: '+998903456789', email: 'gulnora@school.uz', experience: 10, baseSalary: 4500000 },
+        { id: 4, name: 'Bobur Aliyev', subject: 'Ingliz tili', phone: '+998904567890', email: 'bobur@school.uz', experience: 6, baseSalary: 5200000 },
+        { id: 5, name: 'Dilshod Karimov', subject: 'Tarix', phone: '+998905678901', email: 'dilshod@school.uz', experience: 7, baseSalary: 4600000 },
+        { id: 6, name: 'Nodira Ismoilova', subject: 'Biologiya', phone: '+998906789012', email: 'nodira@school.uz', experience: 4, baseSalary: 4700000 }
+      ];
+      setTeachers(defaultTeachers);
+      localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
+    } else {
+      setTeachers(storedTeachers);
+    }
+  };
+
+  const loadSalaryHistory = () => {
+    const stored = localStorage.getItem('salaryHistory');
+    if (stored) {
+      setSalaryHistory(JSON.parse(stored));
+    } else {
+      setSalaryHistory([]);
+      localStorage.setItem('salaryHistory', JSON.stringify([]));
+    }
   };
 
   const savePayrolls = (data) => {
     setPayrolls(data);
     localStorage.setItem('payroll', JSON.stringify(data));
+  };
+
+  const saveSalaryHistory = (data) => {
+    setSalaryHistory(data);
+    localStorage.setItem('salaryHistory', JSON.stringify(data));
   };
 
   const calculateTotal = (data) => {
@@ -62,13 +154,16 @@ const Payroll = () => {
     setEditingPayroll({
       teacherName: '',
       teacherId: '',
+      subject: '',
       month: selectedMonth,
       baseSalary: 0,
       bonus: 0,
       deduction: 0,
       total: 0,
       status: 'pending',
-      paymentDate: ''
+      paymentDate: '',
+      paymentMethod: 'Naqd',
+      description: ''
     });
     setShowModal(true);
   };
@@ -76,6 +171,19 @@ const Payroll = () => {
   const handleEdit = (payroll) => {
     setEditingPayroll({ ...payroll });
     setShowModal(true);
+    setOpenAccordionId(null);
+  };
+
+  const handleView = (payroll) => {
+    setSelectedPayroll(payroll);
+    setShowDetailsModal(true);
+    setOpenAccordionId(null);
+  };
+
+  const handleViewReceipt = (payroll) => {
+    setSelectedPayroll(payroll);
+    setShowReceiptModal(true);
+    setOpenAccordionId(null);
   };
 
   const handleSave = () => {
@@ -92,7 +200,12 @@ const Payroll = () => {
       savePayrolls(updated);
       alert("Oylik ma'lumotlari yangilandi!");
     } else {
-      savePayrolls([{ ...updatedPayroll, id: Date.now() }, ...payrolls]);
+      const newPayroll = { 
+        ...updatedPayroll, 
+        id: Date.now(),
+        receiptNo: `PR-${String(Date.now()).slice(-6)}`
+      };
+      savePayrolls([newPayroll, ...payrolls]);
       alert("Yangi oylik qo'shildi!");
     }
 
@@ -104,14 +217,43 @@ const Payroll = () => {
     if (window.confirm("Oylik ma'lumotini o'chirmoqchimisiz?")) {
       savePayrolls(payrolls.filter((p) => p.id !== id));
       alert("O'chirildi!");
+      setOpenAccordionId(null);
     }
   };
 
   const handleStatusChange = (id, newStatus) => {
     const updated = payrolls.map(p => 
-      p.id === id ? { ...p, status: newStatus, paymentDate: newStatus === 'paid' ? new Date().toISOString().split('T')[0] : '' } : p
+      p.id === id ? { 
+        ...p, 
+        status: newStatus, 
+        paymentDate: newStatus === 'paid' ? new Date().toISOString().split('T')[0] : '',
+        description: newStatus === 'paid' ? "To'lov qabul qilindi" : "To'lov kutilmoqda"
+      } : p
     );
     savePayrolls(updated);
+    
+    // Historyga qo'shish
+    const changedPayroll = updated.find(p => p.id === id);
+    if (newStatus === 'paid') {
+      const historyEntry = {
+        id: Date.now(),
+        payrollId: id,
+        teacherName: changedPayroll.teacherName,
+        month: changedPayroll.month,
+        amount: changedPayroll.total,
+        date: new Date().toISOString().split('T')[0],
+        type: 'payment'
+      };
+      saveSalaryHistory([historyEntry, ...salaryHistory]);
+    }
+  };
+
+  const toggleAccordion = (id, e) => {
+    if (e && (e.target.closest('.action-btn-accordion') || e.target.closest('.accordion-trigger'))) {
+      if (e) e.stopPropagation();
+      return;
+    }
+    setOpenAccordionId(openAccordionId === id ? null : id);
   };
 
   // FILTER
@@ -127,20 +269,26 @@ const Payroll = () => {
   const pendingCount = filtered.filter(p => p.status === 'pending').length;
   const paidAmount = filtered.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.total, 0);
   const pendingAmount = filtered.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.total, 0);
+  const paymentRate = filtered.length > 0 ? ((paidCount / filtered.length) * 100).toFixed(1) : 0;
 
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('uz-UZ').format(amount) + ' so\'m';
   };
 
+  const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('uz-UZ');
+  };
+
   // Eksport qilish
   const exportToCSV = () => {
-    const headers = ['ID', "O'qituvchi", 'Asosiy maosh', 'Bonus', 'Ajratma', 'Jami', 'Holat', "To'lov sanasi", 'Oy'];
+    const headers = ['ID', "O'qituvchi", 'Fan', 'Asosiy maosh', 'Bonus', 'Ajratma', 'Jami', 'Holat', "To'lov sanasi", "To'lov usuli", 'Kvitansiya', 'Oy'];
     const csvData = filtered.map(p => [
-      p.id, p.teacherName, p.baseSalary, p.bonus, p.deduction, p.total,
-      p.status === 'paid' ? "To'langan" : 'Kutilmoqda', p.paymentDate || '-', p.month
+      p.id, p.teacherName, p.subject || '-', p.baseSalary, p.bonus, p.deduction, p.total,
+      p.status === 'paid' ? "To'langan" : 'Kutilmoqda', p.paymentDate || '-', p.paymentMethod || '-', p.receiptNo || '-', p.month
     ]);
     const csvContent = [headers, ...csvData].map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -149,24 +297,95 @@ const Payroll = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Chop etish
+  const printReceipt = (payroll) => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Ish haqi kvitansiyasi ${payroll.receiptNo}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; }
+          .receipt { max-width: 700px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+          .header { text-align: center; padding: 30px; background: linear-gradient(135deg, #f8fafc, #fff); border-bottom: 2px solid #10b981; }
+          .school-name { font-size: 24px; font-weight: bold; color: #10b981; }
+          .receipt-no { font-size: 14px; color: #666; margin-top: 10px; font-family: monospace; }
+          .details { padding: 20px 30px; }
+          .row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+          .label { font-weight: bold; color: #475569; }
+          .total { font-size: 20px; font-weight: bold; color: #10b981; text-align: right; padding: 15px 30px; background: #f8fafc; border-top: 2px solid #10b981; }
+          .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+          .status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+          .status-paid { background: #d1fae5; color: #065f46; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <div class="header">
+           img src="${Logo}" alt="Maktab logotipi" style="height: 60px; margin-bottom: 20px;" />
+            <div>Ish haqi kvitansiyasi</div>
+            <div class="receipt-no">№ ${payroll.receiptNo}</div>
+          </div>
+          <div class="details">
+            <div class="row"><span class="label">O'qituvchi:</span><span>${payroll.teacherName}</span></div>
+            <div class="row"><span class="label">Fan:</span><span>${payroll.subject || '-'}</span></div>
+            <div class="row"><span class="label">Oy:</span><span>${payroll.month}</span></div>
+            <div class="row"><span class="label">Asosiy maosh:</span><span>${formatMoney(payroll.baseSalary)}</span></div>
+            <div class="row"><span class="label">Bonus:</span><span>+${formatMoney(payroll.bonus)}</span></div>
+            <div class="row"><span class="label">Ajratma:</span><span>-${formatMoney(payroll.deduction)}</span></div>
+            <div class="row"><span class="label">To'lov usuli:</span><span>${payroll.paymentMethod || 'Naqd'}</span></div>
+            <div class="row"><span class="label">To'lov sanasi:</span><span>${formatDate(payroll.paymentDate)}</span></div>
+          </div>
+          <div class="total">Jami: ${formatMoney(payroll.total)}</div>
+          <div class="footer"><p>✅ To'lov muvaffaqiyatli amalga oshirildi.</p></div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  const resetFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('');
+  };
+
   // Oylar ro'yxati
   const months = [
     '2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06',
     '2024-07', '2024-08', '2024-09', '2024-10', '2024-11', '2024-12',
-    '2025-01', '2025-02', '2025-03'
+    '2025-01', '2025-02', '2025-03', '2025-04', '2025-05', '2025-06'
   ];
+
+  const getStatusIcon = (status) => {
+    return status === 'paid' ? <HiOutlineCheckCircle /> : <HiOutlineClock />;
+  };
+
+  const getMethodIcon = (method) => {
+    switch(method) {
+      case 'Naqd': return <HiOutlineCash />;
+      case 'Plastik': return <HiOutlineCreditCard />;
+      case 'Bank': return <HiOutlineCurrencyDollar />;
+      default: return <HiOutlineCurrencyDollar />;
+    }
+  };
 
   return (
     <div className="payroll-page">
       {/* HEADER */}
       <div className="page-header">
         <div>
-          <h1>Oyliklar / Ish haqi</h1>
-          <p>{filtered.length} ta xodim | Jami: {formatMoney(totalSalary)}</p>
+          <h1><HiOutlineCash /> Oyliklar / Ish haqi</h1>
+          <p><HiOutlineUsers /> {filtered.length} ta xodim | Jami: {formatMoney(totalSalary)} | To'lov ko'rsatkichi: {paymentRate}%</p>
         </div>
         <div className="header-buttons">
           <button className="btn-export" onClick={exportToCSV}>
             <HiOutlineDownload /> Hisobot
+          </button>
+          <button className="btn-export" onClick={resetFilters}>
+            <HiOutlineRefresh /> Filtrni tozalash
           </button>
           <button className="btn-primary" onClick={handleAdd}>
             <HiOutlinePlus /> Yangi oylik
@@ -183,6 +402,7 @@ const Payroll = () => {
           <div className="stat-info">
             <h3>Jami to'lov</h3>
             <p>{formatMoney(totalSalary)}</p>
+            <small><HiOutlineTrendingUp /> +8% o'tgan oyga nisbatan</small>
           </div>
         </div>
         <div className="stat-card">
@@ -192,6 +412,7 @@ const Payroll = () => {
           <div className="stat-info">
             <h3>To'langan</h3>
             <p>{paidCount} ta | {formatMoney(paidAmount)}</p>
+            <small>{paymentRate}% to'lov ko'rsatkichi</small>
           </div>
         </div>
         <div className="stat-card">
@@ -201,15 +422,17 @@ const Payroll = () => {
           <div className="stat-info">
             <h3>Kutilayotgan</h3>
             <p>{pendingCount} ta | {formatMoney(pendingAmount)}</p>
+            <small><HiOutlineExclamationCircle /> To'lov kutilmoqda</small>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon" style={{ background: '#8b5cf615', color: '#8b5cf6' }}>
-            <HiOutlineUser />
+            <HiOutlineCalculator />
           </div>
           <div className="stat-info">
-            <h3>Xodimlar</h3>
-            <p>{teachers.length} nafar</p>
+            <h3>O'rtacha maosh</h3>
+            <p>{filtered.length > 0 ? formatMoney(totalSalary / filtered.length) : formatMoney(0)}</p>
+            <small>{teachers.length} nafar xodim</small>
           </div>
         </div>
       </div>
@@ -226,9 +449,12 @@ const Payroll = () => {
           />
         </div>
         <div className="filter-group">
-          <select className="filter-select" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
-            {months.map(month => <option key={month} value={month}>{month}</option>)}
-          </select>
+          <div className="month-selector">
+            <HiOutlineCalendar />
+            <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+              {months.map(month => <option key={month} value={month}>{month}</option>)}
+            </select>
+          </div>
           <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="">Barcha holatlar</option>
             <option value="paid">To'langan</option>
@@ -244,19 +470,20 @@ const Payroll = () => {
             <tr>
               <th>ID</th>
               <th>O'qituvchi</th>
+              <th>Fan</th>
               <th>Asosiy maosh</th>
               <th>Bonus</th>
               <th>Ajratma</th>
               <th>Jami</th>
               <th>Holat</th>
               <th>To'lov sanasi</th>
-              <th>Amallar</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan="9" className="empty-table">
+                <td colSpan="10" className="empty-table">
                   <div className="empty-state">
                     <HiOutlineCash size={48} />
                     <p>Hech qanday oylik ma'lumoti topilmadi</p>
@@ -266,59 +493,264 @@ const Payroll = () => {
               </tr>
             ) : (
               filtered.map((p) => (
-                <tr key={p.id} className={p.status === 'pending' ? 'pending-row' : ''}>
-                  <td>#{p.id}</td>
-                  <td>
-                    <div className="teacher-cell">
-                      <div className="teacher-avatar">{p.teacherName.charAt(0)}</div>
-                      {p.teacherName}
-                    </div>
-                  </td>
-                  <td className="amount-cell">{formatMoney(p.baseSalary)}</td>
-                  <td className="bonus-cell">+{formatMoney(p.bonus)}</td>
-                  <td className="deduction-cell">-{formatMoney(p.deduction)}</td>
-                  <td className="total-cell">{formatMoney(p.total)}</td>
-                  <td>
-                    <select 
-                      className={`status-badge ${p.status}`}
-                      value={p.status}
-                      onChange={(e) => handleStatusChange(p.id, e.target.value)}
-                    >
-                      <option value="paid">✅ To'langan</option>
-                      <option value="pending">⏳ Kutilmoqda</option>
-                    </select>
-                  </td>
-                  <td>{p.paymentDate || '-'}</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button className="action-btn edit" onClick={() => handleEdit(p)}>
-                        <HiOutlinePencil />
+                <React.Fragment key={p.id}>
+                  <tr 
+                    className={`payroll-row ${p.status === 'pending' ? 'pending-row' : ''} ${openAccordionId === p.id ? 'active' : ''}`}
+                    onClick={(e) => toggleAccordion(p.id, e)}
+                  >
+                    <td>#{p.id}</td>
+                    <td>
+                      <div className="teacher-cell">
+                        <div className="teacher-avatar">{p.teacherName.charAt(0)}</div>
+                        {p.teacherName}
+                      </div>
+                    </td>
+                    <td>{p.subject || '-'}</td>
+                    <td className="amount-cell">{formatMoney(p.baseSalary)}</td>
+                    <td className="bonus-cell">+{formatMoney(p.bonus)}</td>
+                    <td className="deduction-cell">-{formatMoney(p.deduction)}</td>
+                    <td className="total-cell">{formatMoney(p.total)}</td>
+                    <td>
+                      <select 
+                        className={`status-badge ${p.status}`}
+                        value={p.status}
+                        onChange={(e) => handleStatusChange(p.id, e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <option value="paid">✅ To'langan</option>
+                        <option value="pending">⏳ Kutilmoqda</option>
+                      </select>
+                    </td>
+                    <td>{p.paymentDate ? formatDate(p.paymentDate) : '-'}</td>
+                    <td>
+                      <button 
+                        className={`accordion-trigger ${openAccordionId === p.id ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenAccordionId(openAccordionId === p.id ? null : p.id);
+                        }}
+                      >
+                        {openAccordionId === p.id ? <HiOutlineChevronUp /> : <HiOutlineChevronDown />}
                       </button>
-                      <button className="action-btn delete" onClick={() => handleDelete(p.id)}>
-                        <HiOutlineTrash />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  {/* Accordion panel */}
+                  {openAccordionId === p.id && (
+                    <tr className="accordion-row">
+                      <td colSpan="10" className="accordion-cell">
+                        <div className="accordion-content">
+                          <div className="action-buttons-accordion">
+                            <button className="action-btn-accordion view" onClick={(e) => { e.stopPropagation(); handleView(p); }}>
+                              <HiOutlineEye /> <span>Ko'rish</span>
+                            </button>
+                            <button className="action-btn-accordion receipt" onClick={(e) => { e.stopPropagation(); handleViewReceipt(p); }}>
+                              <HiOutlineReceiptTax /> <span>Kvitansiya</span>
+                            </button>
+                            <button className="action-btn-accordion edit" onClick={(e) => { e.stopPropagation(); handleEdit(p); }}>
+                              <HiOutlinePencil /> <span>Tahrirlash</span>
+                            </button>
+                            <button className="action-btn-accordion delete" onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }}>
+                              <HiOutlineTrash /> <span>O'chirish</span>
+                            </button>
+                          </div>
+                          <div className="accordion-info">
+                            <div className="info-item">
+                              <span className="info-label"><HiOutlineReceiptTax /> Kvitansiya raqami:</span>
+                              <span className="info-value">{p.receiptNo || '-'}</span>
+                            </div>
+                            <div className="info-item">
+                              <span className="info-label"><HiOutlineCreditCard /> To'lov usuli:</span>
+                              <span className="info-value">{getMethodIcon(p.paymentMethod)} {p.paymentMethod || 'Naqd'}</span>
+                            </div>
+                            <div className="info-item">
+                              <span className="info-label"><HiOutlineDocumentText /> Tavsif:</span>
+                              <span className="info-value">{p.description || '-'}</span>
+                            </div>
+                            <div className="info-item">
+                              <span className="info-label"><HiOutlineCalculator /> Hisoblash:</span>
+                              <span className="info-value">{formatMoney(p.baseSalary)} + {formatMoney(p.bonus)} - {formatMoney(p.deduction)} = {formatMoney(p.total)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))
             )}
           </tbody>
         </table>
       </div>
 
+      {/* KO'RISH MODAL */}
+      {showDetailsModal && selectedPayroll && (
+        <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><HiOutlineEye /> Oylik ma'lumotlari</h2>
+              <button className="modal-close" onClick={() => setShowDetailsModal(false)}>
+                <HiOutlineX />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="details-grid">
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineUser /> O'qituvchi:</span>
+                  <span className="detail-value">{selectedPayroll.teacherName}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineBookOpen /> Fan:</span>
+                  <span className="detail-value">{selectedPayroll.subject || '-'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineCalendar /> Oy:</span>
+                  <span className="detail-value">{selectedPayroll.month}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineReceiptTax /> Kvitansiya:</span>
+                  <span className="detail-value">{selectedPayroll.receiptNo || '-'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineCash /> Asosiy maosh:</span>
+                  <span className="detail-value">{formatMoney(selectedPayroll.baseSalary)}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineTrendingUp /> Bonus:</span>
+                  <span className="detail-value">+{formatMoney(selectedPayroll.bonus)}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineTrendingDown /> Ajratma:</span>
+                  <span className="detail-value">-{formatMoney(selectedPayroll.deduction)}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineCurrencyDollar /> Jami:</span>
+                  <span className="detail-value total-amount">{formatMoney(selectedPayroll.total)}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label"><HiOutlineCheckCircle /> Holat:</span>
+                  <span className={`status-badge ${selectedPayroll.status}`}>
+                    {getStatusIcon(selectedPayroll.status)} {selectedPayroll.status === 'paid' ? "To'langan" : 'Kutilmoqda'}
+                  </span>
+                </div>
+                {selectedPayroll.paymentDate && (
+                  <div className="detail-item">
+                    <span className="detail-label"><HiOutlineCalendar /> To'lov sanasi:</span>
+                    <span className="detail-value">{formatDate(selectedPayroll.paymentDate)}</span>
+                  </div>
+                )}
+                {selectedPayroll.paymentMethod && (
+                  <div className="detail-item">
+                    <span className="detail-label"><HiOutlineCreditCard /> To'lov usuli:</span>
+                    <span className="detail-value">{selectedPayroll.paymentMethod}</span>
+                  </div>
+                )}
+                {selectedPayroll.description && (
+                  <div className="detail-item full-width">
+                    <span className="detail-label"><HiOutlineDocumentText /> Tavsif:</span>
+                    <span className="detail-value">{selectedPayroll.description}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-primary" onClick={() => { setShowDetailsModal(false); handleViewReceipt(selectedPayroll); }}>
+                <HiOutlineReceiptTax /> Kvitansiya
+              </button>
+              <button className="btn-secondary" onClick={() => setShowDetailsModal(false)}>Yopish</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* KVITANSIYA MODAL */}
+      {showReceiptModal && selectedPayroll && (
+        <div className="modal-overlay" onClick={() => setShowReceiptModal(false)}>
+          <div className="modal-content receipt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><HiOutlineReceiptTax /> Ish haqi kvitansiyasi</h2>
+              <button className="modal-close" onClick={() => setShowReceiptModal(false)}>
+                <HiOutlineX />
+              </button>
+            </div>
+            <div className="modal-body receipt-body">
+              <div className="receipt-header">
+            <img src={Logo} alt="Maktab logotipi" />
+               
+                <p>Ish haqi kvitansiyasi</p>
+                <div className="receipt-no">№ {selectedPayroll.receiptNo || 'PR-' + String(selectedPayroll.id).slice(-6)}</div>
+              </div>
+              <div className="receipt-details">
+                <div className="receipt-row">
+                  <span className="receipt-label">O'qituvchi:</span>
+                  <span className="receipt-value">{selectedPayroll.teacherName}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Fan:</span>
+                  <span className="receipt-value">{selectedPayroll.subject || '-'}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Oy:</span>
+                  <span className="receipt-value">{selectedPayroll.month}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Asosiy maosh:</span>
+                  <span className="receipt-value">{formatMoney(selectedPayroll.baseSalary)}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Bonus:</span>
+                  <span className="receipt-value bonus">+{formatMoney(selectedPayroll.bonus)}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Ajratma:</span>
+                  <span className="receipt-value deduction">-{formatMoney(selectedPayroll.deduction)}</span>
+                </div>
+                <div className="receipt-row total-row">
+                  <span className="receipt-label">Jami summa:</span>
+                  <span className="receipt-value total-amount">{formatMoney(selectedPayroll.total)}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">To'lov usuli:</span>
+                  <span className="receipt-value">{selectedPayroll.paymentMethod || 'Naqd'}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">To'lov sanasi:</span>
+                  <span className="receipt-value">{formatDate(selectedPayroll.paymentDate)}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Holat:</span>
+                  <span className={`status-badge ${selectedPayroll.status}`}>
+                    {selectedPayroll.status === 'paid' ? "✅ To'langan" : "⏳ Kutilmoqda"}
+                  </span>
+                </div>
+              </div>
+              <div className="receipt-footer">
+                <p>Rahmat! To'lov muvaffaqiyatli amalga oshirildi.</p>
+                <p className="receipt-note">Ushbu kvitansiyani saqlab qo'ying!</p>
+              </div>
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-primary" onClick={() => printReceipt(selectedPayroll)}>
+                <HiOutlinePrinter /> Chop etish
+              </button>
+              <button className="btn-secondary" onClick={() => setShowReceiptModal(false)}>Yopish</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingPayroll?.id ? 'Oylik tahrirlash' : 'Yangi oylik'}</h2>
+              <h2>{editingPayroll?.id ? <HiOutlinePencil /> : <HiOutlinePlus />} {editingPayroll?.id ? 'Oylik tahrirlash' : 'Yangi oylik'}</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>
                 <HiOutlineX />
               </button>
             </div>
             <div className="modal-body">
               <div className="form-group">
-                <label>O'qituvchi *</label>
+                <label><HiOutlineUser /> O'qituvchi *</label>
                 <select
                   value={editingPayroll?.teacherName || ''}
                   onChange={(e) => {
@@ -326,7 +758,9 @@ const Payroll = () => {
                     setEditingPayroll({
                       ...editingPayroll,
                       teacherName: e.target.value,
-                      teacherId: selectedTeacher?.id
+                      teacherId: selectedTeacher?.id,
+                      subject: selectedTeacher?.subject,
+                      baseSalary: selectedTeacher?.baseSalary || 0
                     });
                   }}
                 >
@@ -341,7 +775,7 @@ const Payroll = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Asosiy maosh</label>
+                  <label><HiOutlineCash /> Asosiy maosh</label>
                   <input
                     type="number"
                     placeholder="Asosiy maosh"
@@ -355,7 +789,7 @@ const Payroll = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Bonus</label>
+                  <label><HiOutlineTrendingUp /> Bonus</label>
                   <input
                     type="number"
                     placeholder="Bonus"
@@ -372,7 +806,7 @@ const Payroll = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Ajratma</label>
+                  <label><HiOutlineTrendingDown /> Ajratma</label>
                   <input
                     type="number"
                     placeholder="Ajratma"
@@ -386,7 +820,7 @@ const Payroll = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Jami</label>
+                  <label><HiOutlineCalculator /> Jami</label>
                   <input
                     type="text"
                     value={formatMoney(calculateTotal(editingPayroll))}
@@ -398,7 +832,7 @@ const Payroll = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Oy</label>
+                  <label><HiOutlineCalendar /> Oy</label>
                   <select
                     value={editingPayroll?.month || selectedMonth}
                     onChange={(e) => setEditingPayroll({ ...editingPayroll, month: e.target.value })}
@@ -407,7 +841,22 @@ const Payroll = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Holat</label>
+                  <label><HiOutlineCreditCard /> To'lov usuli</label>
+                  <select
+                    value={editingPayroll?.paymentMethod || 'Naqd'}
+                    onChange={(e) => setEditingPayroll({ ...editingPayroll, paymentMethod: e.target.value })}
+                  >
+                    <option value="Naqd">Naqd</option>
+                    <option value="Plastik">Plastik</option>
+                    <option value="Bank">Bank</option>
+                    <option value="Click">Click</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label><HiOutlineCheckCircle /> Holat</label>
                   <select
                     value={editingPayroll?.status || 'pending'}
                     onChange={(e) => setEditingPayroll({ ...editingPayroll, status: e.target.value })}
@@ -416,18 +865,27 @@ const Payroll = () => {
                     <option value="paid">To'langan</option>
                   </select>
                 </div>
+                {editingPayroll?.status === 'paid' && (
+                  <div className="form-group">
+                    <label><HiOutlineCalendar /> To'lov sanasi</label>
+                    <input
+                      type="date"
+                      value={editingPayroll?.paymentDate || new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setEditingPayroll({ ...editingPayroll, paymentDate: e.target.value })}
+                    />
+                  </div>
+                )}
               </div>
 
-              {editingPayroll?.status === 'paid' && (
-                <div className="form-group">
-                  <label>To'lov sanasi</label>
-                  <input
-                    type="date"
-                    value={editingPayroll?.paymentDate || new Date().toISOString().split('T')[0]}
-                    onChange={(e) => setEditingPayroll({ ...editingPayroll, paymentDate: e.target.value })}
-                  />
-                </div>
-              )}
+              <div className="form-group">
+                <label><HiOutlineDocumentText /> Tavsif</label>
+                <textarea
+                  rows="2"
+                  placeholder="Qo'shimcha ma'lumot..."
+                  value={editingPayroll?.description || ''}
+                  onChange={(e) => setEditingPayroll({ ...editingPayroll, description: e.target.value })}
+                />
+              </div>
             </div>
             <div className="modal-buttons">
               <button className="btn-primary" onClick={handleSave}>
@@ -445,4 +903,3 @@ const Payroll = () => {
 };
 
 export default Payroll;
- 

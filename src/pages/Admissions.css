@@ -503,7 +503,7 @@
 .modal-close:hover {
   background: #e2e8f0;
   color: #ef4444;
-  transform: rotate(90deg);
+
 }
 
 .modal-body {
