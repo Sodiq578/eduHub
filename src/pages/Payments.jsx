@@ -29,12 +29,11 @@ import {
   HiOutlineCalculator,
   HiOutlineExclamationCircle,
   HiOutlineBookOpen,
-  HiOutlineUsers
+  HiOutlineUsers,
+  HiOutlineXCircle
 } from 'react-icons/hi';
-import './Payroll.css';
-import { useAuth } from '../context/AuthContext';
 import './Payments.css';
-import Logo from '../assets/logo.svg';
+import { useAuth } from '../context/AuthContext';
 
 const Payments = () => {
   const { user, roles } = useAuth();
@@ -380,7 +379,7 @@ const Payments = () => {
       <body>
         <div class="invoice">
           <div class="header">
-        img src="${Logo}" alt="Maktab logotipi" style="height: 60px; margin-bottom: 20px;" />
+            <div class="school-name">🏫 BILIM MARKAZI</div>
             <div>To'lov kvitansiyasi</div>
             <div class="receipt-no">№ ${payment.receiptNo}</div>
           </div>
@@ -856,7 +855,11 @@ const Payments = () => {
           <div className="modal-content invoice-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header"><h2><HiOutlineReceiptTax /> Kvitansiya #{selectedPayment.receiptNo}</h2><button className="modal-close" onClick={() => setShowInvoiceModal(false)}><HiOutlineX /></button></div>
             <div className="modal-body invoice-body">
-              <div className="invoice-header"><div className="school-logo"></div><img src={Logo} alt="Maktab logotipi" style={{ height: '60px', marginBottom: '20px' }} /><p>To'lov kvitansiyasi</p></div>
+              <div className="invoice-header">
+                <div className="school-logo">🏫</div>
+                <h3>BILIM MARKAZI</h3>
+                <p>To'lov kvitansiyasi</p>
+              </div>
               <div className="invoice-details">
                 <div className="invoice-row"><span className="invoice-label">Kvitansiya raqami:</span><span className="invoice-value">{selectedPayment.receiptNo}</span></div>
                 <div className="invoice-row"><span className="invoice-label">Sana:</span><span className="invoice-value">{formatDate(selectedPayment.date)}</span></div>
