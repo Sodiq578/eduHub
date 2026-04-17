@@ -955,7 +955,7 @@ const Dashboard = ({ onNavigate, userRole = 'admin' }) => {
               return (
                 <button 
                   key={key} 
-                  className="nav-item"
+                  className="nav-item-dashboard"
                   onClick={() => handleNavigate(key)}
                 >
                   <Icon />
